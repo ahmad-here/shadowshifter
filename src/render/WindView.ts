@@ -96,11 +96,22 @@ export class WindView {
       const z = sim.z + fz * a + fx * l;
       const y = base + this.up[i]!;
       const sl = lens ? len * 0.6 : len;
-      p.set([x, y, z, x - fx * sl, y + this.slant * sl * 0.18, z - fz * sl], i * 6);
+      const o = i * 6;
+      p[o] = x;
+      p[o + 1] = y;
+      p[o + 2] = z;
+      p[o + 3] = x - fx * sl;
+      p[o + 4] = y + this.slant * sl * 0.18;
+      p[o + 5] = z - fz * sl;
       // Fade in from far ahead so streaks never pop into view.
       const k = glow * Math.min(1, (AHEAD - a) / 8) * (lens ? 1.4 : 1);
       const col = this.tint[i]!;
-      c.set([col.r * k, col.g * k, col.b * k, 0, 0, 0], i * 6);
+      c[i * 6 + 0] = col.r * k;
+      c[i * 6 + 1] = col.g * k;
+      c[i * 6 + 2] = col.b * k;
+      c[i * 6 + 3] = 0;
+      c[i * 6 + 4] = 0;
+      c[i * 6 + 5] = 0;
     }
     this.lines.geometry.setDrawRange(0, active * 2);
     (this.lines.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;

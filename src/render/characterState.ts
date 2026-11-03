@@ -1,7 +1,8 @@
 import { CONFIG } from '../game/config';
 import type { GameSim } from '../game/sim';
 
-export type ClipName = 'run' | 'runBack' | 'jumpUp' | 'jumpDown' | 'slide';
+export type ClipName =
+  'run' | 'runBack' | 'jumpUp' | 'jumpDown' | 'slide' | 'wallRunR' | 'wallRunL';
 
 /** Source clip lengths (s) in runner.glb, used to time clips to the simulation. */
 export const CLIP_SECONDS: Record<ClipName, number> = {
@@ -10,6 +11,9 @@ export const CLIP_SECONDS: Record<ClipName, number> = {
   jumpUp: 0.83,
   jumpDown: 2.3,
   slide: 1.53,
+  /** Authored in Blender (tools/blender/wallrun.py): feet on a wall to the right / left. */
+  wallRunR: 0.7,
+  wallRunL: 0.7,
 };
 
 export interface ClipChoice {
@@ -32,7 +36,10 @@ export function chooseClip(sim: GameSim): ClipChoice {
   }
   // Parkour moves: the run cycle on the wall and (fast, scrambling) up a climb; a tuck for the
   // flip and the vault.
-  if (sim.move === 'wallrun') return { clip: 'run', timeScale: sim.speed / 9, loop: true };
+  if (sim.move === 'wallrun') {
+    const clip = (sim.wall?.side ?? 1) > 0 ? 'wallRunR' : 'wallRunL';
+    return { clip, timeScale: sim.speed / 9, loop: true };
+  }
   if (sim.move === 'climb') return { clip: 'jumpUp', timeScale: 2.2, loop: false };
   if (sim.move === 'flip') return { clip: 'jumpUp', timeScale: 1.4, loop: false };
   if (sim.move === 'vault') return { clip: 'jumpUp', timeScale: 1.4, loop: false };

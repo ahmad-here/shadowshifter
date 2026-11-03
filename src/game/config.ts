@@ -104,6 +104,8 @@ export const CONFIG = Object.freeze({
   /** Climb speed up a face (m/s); the flip over the top starts with this upward speed. */
   climbSpeed: 7,
   flipVelocity: 5.5,
+  /** Side leaps carve round a quarter circle of this radius (m) instead of snapping 90 degrees. */
+  turnRadius: 1.2,
   /** Clearing an obstacle (over or under) by less than this (m) counts as a near miss. */
   nearMiss: 0.3,
   /** Vault: triggered this far before a ledge, with this upward speed. */

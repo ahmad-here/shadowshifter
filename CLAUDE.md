@@ -54,6 +54,13 @@ Browser-based 3D endless runner. TypeScript + React + Vite + Three.js. No backen
   its bright core goes dark once used): running through it turns the runner around for 10 s and
   reverses every control: jump ↔ slide and left ↔ right (the user asked for left/right too). Bots use `sim.control()`, which
   bypasses the swap; player input goes through `sim.act()`.
+- **Carved turns** (researched; replaces the 90 degree snap): a side leap runs a quarter circle of
+  `turnRadius` (1.2 m) into the new heading, then flies straight (`sim.facing` for presentation).
+  The camera lags the heading and rolls into the turn; the body banks up to ~22 degrees.
+- **Character animation**: athletic run clip made in Blender (`tools/blender/athletic_run.py`:
+  arm swing x1.3, stride x1.15), wall-run clips authored on the rig (`tools/blender/wallrun.py`:
+  hips rolled 55 degrees, core held, outer arm out), plus a procedural layer
+  (`render/bodyDrive.ts`: speed lean, turn bank, stabilised head, landing compression).
 - **Side-leap rules**: a press early on a dead-end building is held until its window (leap assist).
   A leap is refused if it would head south or land on a building whose route runs another way
   (those only lead to dead branches). Leaps into empty air are allowed.

@@ -814,6 +814,27 @@ describe('parkour moves', () => {
 });
 
 describe('side-leap safety', () => {
+  it('a side leap carves a quarter circle into the new heading, never a 90 degree snap', () => {
+    const sim = custom((w, run) => {
+      w.addPlatform(run, -5, 30, 3, 'rect', 'end');
+      const east = w.newRun(1, 4, -20, 0);
+      w.addPlatform(east, 0, 60, 1.5, 'rect', 'plain');
+    });
+    stepUntil(sim, () => along(sim) >= 18);
+    const x0 = sim.x;
+    const z0 = sim.z;
+    sim.act('right');
+    sim.step(DT);
+    // Mid-arc: still moving partly north while turning east.
+    const t = ((Math.PI / 2) * CONFIG.turnRadius) / sim.speed / 2;
+    stepFor(sim, t);
+    expect(sim.x - x0).toBeGreaterThan(0.05);
+    expect(z0 - sim.z).toBeGreaterThan(0.3);
+    const facing = sim.facing;
+    expect(facing).toBeLessThan(-0.3); // between north (0) and east (-pi/2)
+    expect(facing).toBeGreaterThan(-Math.PI / 2 + 0.3);
+  });
+
   it('a leap onto a building whose route runs the other way is refused', () => {
     const sim = custom((w, run) => {
       w.addPlatform(run, -5, 200, 1.5, 'rect', 'plain');
@@ -874,8 +895,12 @@ describe('side-leap safety', () => {
         if (!a && sim.grounded && sim.effect === 'none' && rng.chance(0.02)) {
           for (const turn of ['left', 'right'] as const) {
             const d = turnDir(sim.dir, turn);
-            const R = jumpDistance(sim.speed);
-            if (sim.world.supportAt(sim.x + DIR_X[d]! * R, sim.z + DIR_Z[d]! * R)) {
+            // Where a carved leap lands: a quarter circle, then straight on.
+            const r = CONFIG.turnRadius;
+            const rest = jumpDistance(sim.speed) - (Math.PI / 2) * r;
+            const x = sim.x + DIR_X[sim.dir]! * r + DIR_X[d]! * (r + rest);
+            const z = sim.z + DIR_Z[sim.dir]! * r + DIR_Z[d]! * (r + rest);
+            if (sim.world.supportAt(x, z)) {
               a = turn;
               offRoute++;
               break;

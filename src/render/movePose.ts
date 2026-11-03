@@ -30,12 +30,12 @@ export function movePose(sim: GameSim): MovePose {
   };
   switch (sim.move) {
     case 'wallrun': {
-      // Feet planted on the wall face (the pose pivots at the feet), body leaning out over the
-      // gap: the head tilts away from the wall.
+      // The wall-run clip carries the pose (hips rolled 55 degrees, feet on the wall); shift the
+      // body over so its feet meet the wall face, which stands `face` out from the lane centre.
       const side = sim.wall?.side ?? 1;
       const face = CONFIG.pathHalfWidth + CONFIG.wallOffset;
       const lat = sim.wall ? runLateral(sim.wall.run, sim.x, sim.z) : 0;
-      return { ...pose, x: side * face - lat, y: 0.4, roll: -side * 0.8 };
+      return { ...pose, x: side * (face - 0.75) - lat, y: 0.35 };
     }
     case 'climb':
       // Scrambling up the face: chest in, leaning hard into the wall.

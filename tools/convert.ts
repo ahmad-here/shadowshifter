@@ -12,13 +12,20 @@ import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 const loader = new FBXLoader();
 const load = (f: string) => loader.loadAsync(encodeURI(`/art/${f}`));
 
-/** Game clip name → source file. The first one also provides the character mesh. */
+/** The character mesh (skin, skeleton, UVs) comes from this file. */
+const MESH_FILE = 'Running.fbx';
+/**
+ * Game clip name → source file. The run is the athletic version made in Blender
+ * (tools/blender/athletic_run.py: harder arm pump, longer stride).
+ */
 const CLIPS: [string, string][] = [
-  ['run', 'Running.fbx'],
+  ['run', 'Running-athletic.fbx'],
   ['runBack', 'Running Backward.fbx'],
   ['jumpUp', 'Jumping Up.fbx'],
   ['jumpDown', 'Jumping Down.fbx'],
   ['slide', 'Running Slide.fbx'],
+  ['wallRunR', 'Wall Run Right.fbx'],
+  ['wallRunL', 'Wall Run Left.fbx'],
 ];
 
 function findSkinned(root: THREE.Object3D): THREE.SkinnedMesh {
@@ -266,9 +273,25 @@ function stripRootMotion(clip: THREE.AnimationClip, name: string, restY: number)
   }
 }
 
+/**
+ * Guard for clips re-exported from Blender: a bone the edit did not touch must animate exactly
+ * as in the original (same names, same bone orientations), or the clip would twist the rig.
+ */
+function checkRig(original: THREE.AnimationClip, edited: THREE.AnimationClip): void {
+  const a = original.tracks.find((t) => /Spine\.quaternion$/.test(t.name));
+  const b = edited.tracks.find((t) => t.name === a?.name);
+  if (!a || !b) throw new Error(`edited run clip has no ${a?.name ?? 'Spine'} track`);
+  const qa = new THREE.Quaternion().fromArray(a.values, 0);
+  const qb = new THREE.Quaternion().fromArray(b.values, 0);
+  const deg = (qa.angleTo(qb) * 180) / Math.PI;
+  if (deg > 2) throw new Error(`edited run clip: Spine differs by ${deg.toFixed(1)} deg`);
+  rigCheck = `Spine matches original within ${deg.toFixed(2)} deg`;
+}
+let rigCheck = 'not checked';
+
 async function convert(targetTris: number) {
   await MeshoptSimplifier.ready;
-  const base = await load(CLIPS[0]![1]);
+  const base = await load(MESH_FILE);
   const mesh = findSkinned(base);
   const before = mesh.geometry.getAttribute('position').count;
   const map = await bakeTexture(mesh.geometry);
@@ -280,8 +303,9 @@ async function convert(targetTris: number) {
   const restY = runHips.values[1]!;
   const clips: THREE.AnimationClip[] = [];
   for (const [name, file] of CLIPS) {
-    const src = name === 'run' ? base : await load(file);
+    const src = file === MESH_FILE ? base : await load(file);
     const clip = src.animations[0]!.clone();
+    if (name === 'run') checkRig(base.animations[0]!, clip);
     clip.name = name;
     stripRootMotion(clip, name, restY);
     clips.push(clip);
@@ -308,6 +332,7 @@ async function convert(targetTris: number) {
       bytes: bytes.length,
       clips: clips.map((c) => `${c.name} ${c.duration.toFixed(2)}s`),
       restHipsY: restY,
+      rigCheck,
     },
   };
 }

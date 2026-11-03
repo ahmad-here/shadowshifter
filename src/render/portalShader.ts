@@ -38,7 +38,10 @@ float bolt(vec2 p, float width) {
 void main() {
   vec2 p = vUv * 2.0 - 1.0;
   float r = length(p);
-  if (r > 1.0) discard;
+  if (r > 1.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
   float a = atan(p.y, p.x);
   vec2 dir = vec2(cos(a), sin(a));
   float t = uTime;

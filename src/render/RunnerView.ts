@@ -101,7 +101,7 @@ export class RunnerView {
     this.squash = 0;
     this.seenJumps = sim.jumps;
     this.seenLandings = sim.landings;
-    this.model?.reset();
+    this.model?.reset(sim);
     for (let i = 0; i < this.trailPoints.length; i += 3) {
       this.trailPoints[i] = sim.x;
       this.trailPoints[i + 1] = 0.9;
@@ -121,7 +121,8 @@ export class RunnerView {
     this.tilt.rotation.z += (-fall.roll * m - this.tilt.rotation.z) * k;
     this.model?.setShadow(fall.shadow);
     this.body.color.setHex(fall.shadow > 0.5 ? 0x020306 : COLORS.runner);
-    this.yaw = approachAngle(this.yaw, dirYaw(sim.dir), 16, dt);
+    // Face along the carved turn (sim.facing), so the body visibly arcs round corners.
+    this.yaw = approachAngle(this.yaw, sim.facing, 18, dt);
     // Mirrored: the runner turns around and runs backwards.
     this.flip = approach(this.flip, sim.mirrored ? Math.PI : 0, 8, dt);
     this.group.rotation.y = this.yaw + this.flip;
@@ -138,7 +139,7 @@ export class RunnerView {
     this.group.scale.set(sxz * fall.scale, sy * fall.scale, sxz * fall.scale);
 
     if (this.model) {
-      this.model.update(chooseClip(sim), dt);
+      this.model.update(chooseClip(sim), dt, sim);
       this.updateTrail(sim);
       return;
     }

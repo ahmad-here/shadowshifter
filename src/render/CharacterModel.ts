@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { CONFIG } from '../game/config';
 import { CLIP_SECONDS, type ClipChoice, type ClipName } from './characterState';
+import { BodyDrive } from './bodyDrive';
 import { COLORS } from './palette';
+import type { GameSim } from '../game/sim';
 
 /** Served from public/models; generated from art/ by `npm run convert:runner`. */
 export const RUNNER_URL = './models/runner.glb';
@@ -18,6 +20,8 @@ export class CharacterModel {
   private mixer: THREE.AnimationMixer;
   private actions = new Map<ClipName, THREE.AnimationAction>();
   private current: ClipName | null = null;
+  /** Procedural lean, banking and head stabilisation on top of the clips. */
+  private drive: BodyDrive;
   private materials: THREE.MeshLambertMaterial[] = [];
 
   constructor(scene: THREE.Object3D, clips: THREE.AnimationClip[]) {
@@ -40,6 +44,7 @@ export class CharacterModel {
       m.frustumCulled = false; // skinned bounds don't follow the animation
     });
     this.root.add(scene);
+    this.drive = new BodyDrive(scene);
     this.mixer = new THREE.AnimationMixer(scene);
     for (const clip of clips) {
       if (clip.name in CLIP_SECONDS)
@@ -49,7 +54,7 @@ export class CharacterModel {
   }
 
   /** Play `choice`, cross-fading from the previous clip. `dt` is presentation time. */
-  update(choice: ClipChoice, dt: number): void {
+  update(choice: ClipChoice, dt: number, sim?: GameSim): void {
     const next = this.actions.get(choice.clip) ?? this.actions.get('run')!;
     if (choice.clip !== this.current) {
       const prev = this.current ? this.actions.get(this.current) : null;
@@ -62,6 +67,7 @@ export class CharacterModel {
     }
     next.timeScale = choice.timeScale;
     this.mixer.update(dt);
+    if (sim) this.drive.apply(sim, dt);
   }
 
   /** Shadow form: 0 = the normal suit, 1 = a pitch-black silhouette with a faint blue edge. */
@@ -73,7 +79,8 @@ export class CharacterModel {
   }
 
   /** Snap back to the first frame (new run). */
-  reset(): void {
+  reset(sim?: GameSim): void {
+    if (sim) this.drive.reset(sim);
     this.mixer.stopAllAction();
     this.current = null;
   }

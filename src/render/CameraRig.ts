@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { GameSim } from '../game/sim';
 import { dirYaw } from '../game/world';
 import { approach, approachAngle } from './math';
-import { paceOf, seen } from './cameraInputs';
+import { markSeen, paceOf, seen, setFov, turnRoll } from './cameraInputs';
 import { jitter, Spring, Wobble } from './springs';
 
 /** Follow stiffness (1/s), critically damped: loose enough that speed-ups and turns visibly lag. */
@@ -30,8 +30,8 @@ export class CameraRig {
   /** Roll held through a slide (alternates side per slide), and the side of the last one. */
   private slideRoll = 0;
   private slideSide = 1;
-  /** Roll held while running along a wall (toward the wall side). */
-  private wallRoll = 0;
+  private wallRoll = 0; // roll held while running along a wall
+  private turnRoll = 0; // roll into a turn while swinging round
   /** Near-miss speed punch (FOV kick), decaying to 0. */
   private kick = 0;
   private seenNear = 0;
@@ -120,17 +120,17 @@ export class CameraRig {
       sim.z + this.aim.z + rz * lat * 0.3,
     );
     this.camera.rotateZ(
-      this.body.roll + this.slideRoll + this.wallRoll + (live ? 0.01 * jitter(this.t * 4 + 9) : 0),
+      this.body.roll +
+        this.slideRoll +
+        this.wallRoll +
+        this.turnRoll +
+        (live ? 0.01 * jitter(this.t * 4 + 9) : 0),
     );
 
     if (sim.nearMisses > this.seenNear && !reduced) this.kick = 1;
     this.seenNear = sim.nearMisses;
     this.kick = approach(this.kick, 0, 6, dt);
-    const fov = this.baseFov + (reduced ? 0 : pace * 8 + this.kick * 6);
-    if (Math.abs(this.camera.fov - fov) > 0.01) {
-      this.camera.fov = fov;
-      this.camera.updateProjectionMatrix();
-    }
+    setFov(this.camera, this.baseFov + (reduced ? 0 : pace * 8 + this.kick * 6));
   }
 
   /** Kick the operator's body for what just happened in the sim. */
@@ -145,9 +145,7 @@ export class CameraRig {
       if (sim.jumps > s.jumps) this.body.kick(0, 1.2, 0);
       if (sim.dir !== s.dir || sim.sideJumps > s.side) {
         // Sudden direction change: the operator is thrown the other way and catches up.
-        const turn =
-          Math.sign(((dirYaw(s.dir) - dirYaw(sim.dir) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI) ||
-          1;
+        const turn = Math.sign(Math.sin(dirYaw(s.dir) - dirYaw(sim.dir))) || 1;
         this.body.kick(turn * 3, 0.5, turn * 0.9);
       }
       if (sim.sliding && !s.sliding) {
@@ -155,17 +153,19 @@ export class CameraRig {
         this.body.kick(this.slideSide * (1.8 + pace), -1.6, this.slideSide * 0.6);
       }
       // A parkour move starting (vault, wall catch, climb grab): the operator lurches.
-      if (seen(sim).moves > s.moves)
+      if (sim.vaults + sim.wallRuns + sim.climbs > s.moves)
         this.body.kick(jitter(this.t * 7) * 1.5, 1.4, (sim.wall?.side ?? 1) * -0.5);
       if (crashed && !s.crash && !reduced) this.shake = 1;
     }
-    this.seen = seen(sim);
+    markSeen(s, sim, crashed);
   }
 
   /** Move the follow springs toward their ideal spots (or jump there when `snap`). */
   private place(sim: GameSim, dt: number, snap: boolean): void {
-    // Turns: the yaw lags, then swings round behind the runner.
-    this.yaw = snap ? dirYaw(sim.dir) : approachAngle(this.yaw, dirYaw(sim.dir), 3.5, dt);
+    // Turns: the camera lags the carved heading and swings round behind (the runner is seen
+    // three-quarter on mid-turn, as in the reference footage).
+    this.yaw = snap ? sim.facing : approachAngle(this.yaw, sim.facing, 2.8, dt);
+    this.turnRoll = snap ? 0 : turnRoll(this.turnRoll, sim.facing, this.yaw, dt);
     const fx = -Math.sin(this.yaw);
     const fz = -Math.cos(this.yaw);
     const portrait = this.camera.aspect < 1;

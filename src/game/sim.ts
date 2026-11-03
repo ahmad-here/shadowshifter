@@ -3,6 +3,7 @@ import { CONFIG, jumpDistance } from './config';
 import {
   DIR_X,
   DIR_Z,
+  dirYaw,
   runAlong,
   runLateral,
   turnDir,
@@ -93,6 +94,9 @@ export class GameSim {
   mirrorTime = 0;
 
   private coyote = 0;
+  /** Carved turn in progress: the heading it started from, and arc length still to run. */
+  private arcFrom: Dir = 0;
+  private arcLeft = 0;
   /** True from a trampoline bounce until touchdown (mid-air steering allowed). */
   private bounced = false;
   /** Lane hop in progress: unit sideways direction and distance still to drift. */
@@ -172,6 +176,7 @@ export class GameSim {
     this.shards = 0;
     this.mirrorTime = 0;
     this.coyote = 0;
+    this.arcLeft = 0;
     this.leapt = false;
     this.bounced = false;
     this.hopLeft = 0;
@@ -285,6 +290,7 @@ export class GameSim {
       } else if (canLeap && hold === 'go') {
         if (this.leapAllowed(target)) {
           this.sideJumps += 1;
+          this.startArc(this.dir);
           this.leap(target, CONFIG.jumpVelocity);
         } else {
           this.leapsRefused += 1;
@@ -318,8 +324,9 @@ export class GameSim {
   private substep(dt: number): void {
     if (this.move === 'climb') return this.climb(dt);
     const w = this.world;
-    this.x += DIR_X[this.dir]! * this.speed * dt;
-    this.z += DIR_Z[this.dir]! * this.speed * dt;
+    const [hx, hz] = this.heading(dt);
+    this.x += hx * this.speed * dt;
+    this.z += hz * this.speed * dt;
     if (this.hopLeft > 0) {
       // Cover the lane offset over one normal jump's airtime.
       const rate = CONFIG.laneOffset / ((2 * CONFIG.jumpVelocity) / CONFIG.gravity);
@@ -568,8 +575,13 @@ export class GameSim {
    */
   private leapAllowed(target: Dir): boolean {
     if (target === 2) return false;
-    const R = jumpDistance(this.speed);
-    const s = this.world.supportAt(this.x + DIR_X[target]! * R, this.z + DIR_Z[target]! * R);
+    // Where the carved leap lands: a quarter circle (radius r) out of the current heading, then
+    // straight on for the rest of the flight.
+    const r = CONFIG.turnRadius;
+    const rest = jumpDistance(this.speed) - (Math.PI / 2) * r;
+    const x = this.x + DIR_X[this.dir]! * r + DIR_X[target]! * (r + rest);
+    const z = this.z + DIR_Z[this.dir]! * r + DIR_Z[target]! * (r + rest);
+    const s = this.world.supportAt(x, z);
     return !s || s.run.dir === target;
   }
 
@@ -598,6 +610,43 @@ export class GameSim {
   }
 
   /** Mid-air steer during a trampoline bounce: change heading, keep the flight. */
+  /** Begin a carved turn out of heading `from` (the new heading is set by the leap). */
+  private startArc(from: Dir): void {
+    this.arcFrom = from;
+    this.arcLeft = (Math.PI / 2) * CONFIG.turnRadius;
+  }
+
+  /**
+   * Direction of travel this substep: straight along `dir`, or, during a carved turn, along a
+   * quarter circle from the old heading into the new one (constant speed, radius `turnRadius`).
+   */
+  private heading(dt: number): [number, number] {
+    const dx = DIR_X[this.dir]!;
+    const dz = DIR_Z[this.dir]!;
+    if (this.arcLeft <= 0) return [dx, dz];
+    const total = (Math.PI / 2) * CONFIG.turnRadius;
+    const step = Math.min(this.arcLeft, this.speed * dt);
+    // Angle at the middle of this step, for an accurate chord.
+    const theta = ((total - this.arcLeft + step / 2) / total) * (Math.PI / 2);
+    this.arcLeft -= step;
+    const fx = DIR_X[this.arcFrom]!;
+    const fz = DIR_Z[this.arcFrom]!;
+    return [
+      fx * Math.cos(theta) + dx * Math.sin(theta),
+      fz * Math.cos(theta) + dz * Math.sin(theta),
+    ];
+  }
+
+  /** Current facing angle (yaw, radians) including a carved turn in progress, for presentation. */
+  get facing(): number {
+    if (this.arcLeft <= 0) return dirYaw(this.dir);
+    const total = (Math.PI / 2) * CONFIG.turnRadius;
+    const theta = (1 - this.arcLeft / total) * (Math.PI / 2);
+    const fx = DIR_X[this.arcFrom]! * Math.cos(theta) + DIR_X[this.dir]! * Math.sin(theta);
+    const fz = DIR_Z[this.arcFrom]! * Math.cos(theta) + DIR_Z[this.dir]! * Math.sin(theta);
+    return Math.atan2(-fx, -fz);
+  }
+
   private airTurn(dir: Dir): void {
     this.dir = dir;
     this.sideJumps += 1;
