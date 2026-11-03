@@ -1,0 +1,12 @@
+{
+  "name": "Shadow Shift",
+  "short_name": "Shadow Shift",
+  "description": "Endless neon runner: leap between floating towers and outrun the shadow.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0a1830",
+  "theme_color": "#0a1830",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
