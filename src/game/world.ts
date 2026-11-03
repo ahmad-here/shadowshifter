@@ -708,7 +708,7 @@ export class World {
     const calm = this.calm > 0;
     if (calm) this.calm -= 1;
     // Obstacle density ramps up with distance.
-    const density = Math.min(0.7, 0.35 + route / 1500);
+    const density = Math.min(0.8, 0.45 + route / 1200);
     // Round down so a rounded length never exceeds the space it was chosen to fit.
     if (
       !calm &&

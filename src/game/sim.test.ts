@@ -618,6 +618,18 @@ describe('black portal (darkness)', () => {
     expect(sim.phase).toBe('playing');
   });
 
+  it('after surviving it, black portals are harmless for the cooldown', () => {
+    const sim = gateWorld((w, p) => {
+      // A second portal reached during the cooldown, a third after it.
+      w.addSpell(p, 10 + 16 * 12);
+    });
+    stepUntil(sim, () => sim.effect === 'auto', CONFIG.shadowSeconds + 3);
+    stepUntil(sim, () => sim.world.spells[1]!.taken, 30);
+    expect(sim.darkCooldown).toBeGreaterThan(0);
+    expect(sim.effect).not.toBe('shadow');
+    expect(sim.spellsTaken).toBe(1);
+  });
+
   it('it cannot be jumped over', () => {
     const sim = gateWorld();
     stepUntil(sim, () => along(sim) >= 10 - CONFIG.startSpeed * 0.3);

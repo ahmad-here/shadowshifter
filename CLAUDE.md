@@ -39,12 +39,13 @@ Browser-based 3D endless runner. TypeScript + React + Vite + Three.js. No backen
   either, rooftop AC units = vault.
 - **Black portal** (`World.spells`, user's design, replaced the shadow pits): a dark energy gate
   across the lane (void variant of `render/portalShader.ts`), unavoidable at any jump height.
-  Running through it brings **darkness** for `shadowSeconds` (8 s): fog hides all beyond ~12 m from the camera, buildings dim to black
+  Running through it brings **darkness** for `shadowSeconds` (8 s): fog hides all beyond ~18 m from the camera, buildings dim to black
   (`SHADOW_WORLD` uniform in `render/shaders.ts`), the sky goes black, fog closes in and the
   screen edges darken, so visibility really drops. Neon route edges and obstacle colours stay lit;
   the runner is pure black. Controls and hazards are normal. Surviving it earns `autoSeconds` (5 s)
   of **auto-run** (`effect: 'auto'`): the autopilot plays (player moves ignored) and hands control
   back only once grounded on a building, clear of obstacles.
+  After surviving it, black portals are harmless for `darkCooldown` (25 s).
 - **Game feel** (researched: coyote time, jump buffer, squash/stretch were already in): landing and
   slide dust (`render/DustView.ts`), near-miss reward (`sim.nearMisses`: flash ring, FOV punch,
   whoosh), 90 ms hit-stop on crashes (`GameController`). Variable jump height was rejected: a tap

@@ -55,7 +55,7 @@ export const CONFIG = Object.freeze({
   obstacleReactionSeconds: 0.45,
   /** ...and this far from its end (room to land after clearing it before the edge). */
   obstacleEndMargin: 12,
-  obstacleSpacing: 15,
+  obstacleSpacing: 12,
   endMinLength: 18,
   endMaxLength: 22,
   entryLength: 20,
@@ -124,6 +124,8 @@ export const CONFIG = Object.freeze({
   shadowSeconds: 8,
   /** Surviving the darkness earns this long on auto-run (the pilot plays). */
   autoSeconds: 5,
+  /** After surviving the darkness, black portals stay harmless for this long. */
+  darkCooldown: 25,
   /** A black portal's gate: this deep along the run, across the whole lane and every jump. */
   gateDepth: 1.2,
   /** A black portal stands this far into its building. */

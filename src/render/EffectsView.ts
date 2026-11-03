@@ -21,8 +21,8 @@ export class EffectsView {
     this.shadow = approach(this.shadow, sim.effect === 'shadow' ? 1 : 0, 3, dt);
     SHADOW_WORLD.value = this.shadow;
     // Only the last few metres are visible: everything further, neon edges included, is black.
-    this.fog.near = THREE.MathUtils.lerp(40, 2, this.shadow);
-    this.fog.far = THREE.MathUtils.lerp(130, 12, this.shadow);
+    this.fog.near = THREE.MathUtils.lerp(40, 4, this.shadow);
+    this.fog.far = THREE.MathUtils.lerp(130, 18, this.shadow);
     this.sky.setHex(COLORS.sky).lerp(SHADOW_SKY, this.shadow);
     this.fog.color.copy(this.sky);
   }

@@ -72,6 +72,8 @@ export class GameSim {
   /** Black portals run through, and times the darkness lifted (for feedback and sound). */
   spellsTaken = 0;
   shadowExits = 0;
+  /** Seconds left in which black portals stay harmless (after surviving the darkness). */
+  darkCooldown = 0;
   /** Obstacles cleared by a hair (over a barrier or under a beam): rewarded with feedback. */
   nearMisses = 0;
   private lastNear = -1;
@@ -157,6 +159,7 @@ export class GameSim {
     this.bounces = 0;
     this.spellsTaken = 0;
     this.shadowExits = 0;
+    this.darkCooldown = 0;
     this.nearMisses = 0;
     this.lastNear = -1;
     this.vaults = 0;
@@ -294,6 +297,7 @@ export class GameSim {
       }
     }
     if (this.mirrorTime > 0) this.mirrorTime = Math.max(0, this.mirrorTime - dt);
+    if (this.darkCooldown > 0) this.darkCooldown = Math.max(0, this.darkCooldown - dt);
 
     this.speed = Math.min(CONFIG.maxSpeed, this.speed + CONFIG.acceleration * dt);
     if (this.slideTime > 0) this.slideTime = Math.max(0, this.slideTime - dt);
@@ -418,6 +422,8 @@ export class GameSim {
     for (const s of w.spells) {
       if (s.taken || !this.inGate(s)) continue;
       s.taken = true;
+      // Just survived one: portals in the cooldown are harmless (shown spent).
+      if (this.darkCooldown > 0) continue;
       this.spellsTaken += 1;
       this.effect = 'shadow';
       this.effectTime = CONFIG.shadowSeconds;
@@ -714,6 +720,7 @@ export class GameSim {
       this.effect = 'auto';
       this.effectTime = CONFIG.autoSeconds;
       this.shadowExits += 1;
+      this.darkCooldown = CONFIG.darkCooldown;
       this.sideBuffer = null;
       this.jumpBuffer = 0;
       return;
