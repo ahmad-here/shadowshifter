@@ -81,7 +81,7 @@ async function swipe(page: Page, dx: number, dy: number) {
 test('boots without errors and renders the scene', async ({ page }) => {
   const errors = collectErrors(page);
   await open(page);
-  await expect(page.locator('h1')).toContainText('SHADOW');
+  await expect(page.locator('h1')).toContainText(/shadow/i);
   const st = await state(page);
   expect(st.phase).toBe('ready');
   expect(st.render.platforms).toBeGreaterThan(3);

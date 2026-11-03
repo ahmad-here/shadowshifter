@@ -11,8 +11,10 @@ Browser-based 3D endless runner. TypeScript + React + Vite + Three.js. No backen
   follow a short gap, so an edge jump always clears them); drops of 0.5–1.0 m are landed on.
   Junctions, trampolines and their neighbours stay level. Buildings slide to their height as they
   appear (presentation only; physics is the final height from the start).
-- There are no turning corners. To change direction you **leap sideways onto a side building**
-  (← →). At dead ends a side leap is the only way on; at **forks** a side building is offered
+- **Connected corners** (user's request, like the reference video): at a dead end the side building
+  is flush against the corner building, and ←/→ in the window carves round the corner on the
+  ground (no jump; `sim.corners`). Missing it runs off the end. Mid-air ←/→ turns immediately.
+  Forks' corners are connected the same way. At dead ends a side leap is the only way on; at **forks** a side building is offered
   while the path also continues ahead; both branches rejoin at a hub.
 - **Trampoline dead ends** (no walls): nothing lies ahead; the side building sits diagonally beyond
   the end, out of reach of any normal jump or side leap. Bounce on the pad (high, ~1.44 s), then
@@ -45,7 +47,8 @@ Browser-based 3D endless runner. TypeScript + React + Vite + Three.js. No backen
   the runner is pure black. Controls and hazards are normal. Surviving it earns `autoSeconds` (5 s)
   of **auto-run** (`effect: 'auto'`): the autopilot plays (player moves ignored) and hands control
   back only once grounded on a building, clear of obstacles.
-  After surviving it, black portals are harmless for `darkCooldown` (25 s).
+  After surviving it, no black portal appears for `darkCooldown` (25 s): the sim clears any
+  placed or generated meanwhile.
 - **Game feel** (researched: coyote time, jump buffer, squash/stretch were already in): landing and
   slide dust (`render/DustView.ts`), near-miss reward (`sim.nearMisses`: flash ring, FOV punch,
   whoosh), 90 ms hit-stop on crashes (`GameController`). Variable jump height was rejected: a tap
@@ -68,8 +71,8 @@ Browser-based 3D endless runner. TypeScript + React + Vite + Three.js. No backen
   ledge catch up to 0.45 m after a leap;
   obstacles at least 22 m into a building so you land with ≥0.45 s to react; every world is random
   per start (`?seed=N` fixes it for debugging).
-- Buildings are square, hexagonal, triangular and wedge-shaped, and rise up from below about 50 m
-  ahead (the close camera and short reveal keep the route unpredictable).
+- Buildings are square, hexagonal, triangular and wedge-shaped, and rise into place about 140 m
+  ahead (user's request: obstacles must be readable well in advance, never pop up late).
 - **Energy shards** (amber) on calm buildings: collected by running through; counted per run and
   as a lifetime total. Score stays distance.
 - Mechanics unlock in stages (`CONFIG.intro`: trampolines 150 m, spells 200 m, hops 250 m,

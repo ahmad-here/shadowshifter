@@ -71,8 +71,18 @@ describe('soundEvents', () => {
     });
     hit.act('start');
     const ev = record(hit, 300);
-    expect(ev).toContain('crash');
+    expect(ev).toContain('burn'); // a laser barrier burns: zap and sizzle
     expect(ev).not.toContain('fall');
+    const beam = new GameSim(1, {
+      world: () => {
+        const w = new World(1, { empty: true });
+        const p = w.addPlatform(w.newRun(0, 0, 0, 0), -5, 300, 1.5, 'rect', 'plain');
+        w.addObstacle(p, 'high', 10);
+        return w;
+      },
+    });
+    beam.act('start');
+    expect(record(beam, 300)).toContain('crash'); // a pipe is a crash
   });
 
   it('a restart resets counters without replaying every old event', () => {

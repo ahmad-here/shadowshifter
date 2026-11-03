@@ -13,6 +13,7 @@ export type SoundEvent =
   | 'nearMiss'
   | 'mirrorEnd'
   | 'crash'
+  | 'burn'
   | 'fall'
   | 'start'
   | 'shard';
@@ -77,6 +78,7 @@ export function soundEvents(a: SoundState, b: SoundState): SoundEvent[] {
   if (b.portals > a.portals) out.push('portal');
   if (b.nearMisses > a.nearMisses) out.push('nearMiss');
   if (a.mirrored && !b.mirrored && b.phase === 'playing') out.push('mirrorEnd');
-  if (a.phase === 'playing' && b.phase === 'dying') out.push(b.cause === 'fell' ? 'fall' : 'crash');
+  if (a.phase === 'playing' && b.phase === 'dying')
+    out.push(b.cause === 'fell' ? 'fall' : b.cause === 'burn' ? 'burn' : 'crash');
   return out;
 }

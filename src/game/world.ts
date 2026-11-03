@@ -293,6 +293,8 @@ export class World {
   private nextId = 1;
   private frontier: { run: Run; along: number };
   private lastSpellRoute = -Infinity;
+  /** Shortest the next building may be (after a big drop); 0 = no minimum. */
+  private minLength = 0;
   private lastPortalRoute = -Infinity;
   // Due from the moment trampolines unlock, so the first one comes right after its stage.
   private lastTrampolineRoute: number = CONFIG.intro.trampolines - CONFIG.trampolineMaxGap;
@@ -549,10 +551,6 @@ export class World {
     return Math.round(this.rng.range(CONFIG.minGap, max) * 10) / 10;
   }
 
-  private exitGap(): number {
-    return Math.round(this.rng.range(CONFIG.minGap, CONFIG.maxExitGap) * 10) / 10;
-  }
-
   private extend(): void {
     const { run } = this.frontier;
     let along = this.frontier.along;
@@ -581,6 +579,9 @@ export class World {
       }
       this.level = Math.round((this.level + delta) * 10) / 10;
       along = end + g;
+      // A big drop keeps the runner in the air longer: the building it lands on must be long
+      // enough to take the landing at top speed (plus room to run on).
+      this.minLength = delta < 0 ? Math.ceil(landingReach(-delta) - g + 6) : 0;
     }
 
     const route = run.route + along;
@@ -685,8 +686,11 @@ export class World {
   /** Height change for the next ordinary building: 0, a rise (must jump up) or a drop. */
   private levelChange(): number {
     const r = this.rng;
-    if (this.frontierRoute < CONFIG.intro.heights || !r.chance(0.4)) return 0;
-    const up = r.chance(0.5);
+    // Height changes are common, and almost certain once the route is up high (it comes back).
+    const chance = this.level > 2 ? 0.8 : 0.55;
+    if (this.frontierRoute < CONFIG.intro.heights || !r.chance(chance)) return 0;
+    // Above the base level the route tends back down (after climbs), so drops keep coming.
+    const up = r.chance(this.level > 1 ? 0.3 : 0.5);
     let d = up ? r.range(CONFIG.minRise, CONFIG.maxRise) : -r.range(CONFIG.minDrop, CONFIG.maxDrop);
     // Stay within a band so the route never climbs or sinks out of view.
     if (Math.abs(this.level + d) > CONFIG.maxLevel) {
@@ -697,6 +701,11 @@ export class World {
   }
 
   private chooseLength(max: number): number {
+    const len = this.pickLength(max);
+    return Math.max(len, Math.min(max, this.minLength));
+  }
+
+  private pickLength(max: number): number {
     const r = this.rng;
     const route = this.frontierRoute;
     // An overdue spell or portal needs a plain building to sit on: make the next one plain.
@@ -828,7 +837,9 @@ export class World {
 
   /** First platform of a new run after a side exit. Returns where the next platform starts. */
   private entry(run: Run): number {
-    const a = CONFIG.junctionHalfWidth + this.exitGap();
+    // Connected corner: the new run's first building is flush against the side of the corner
+    // building, so a turn is run round on the ground (no gap to leap).
+    const a = CONFIG.junctionHalfWidth;
     const p = this.addPlatform(
       run,
       a,
@@ -913,16 +924,16 @@ export class World {
     const fCorner = this.addPlatform(run, fCornerA, c + A + half, half, 'rect', 'end');
     const fE = this.addExit(fCorner, c + A, side, false);
     const hubA = B + half - endLen();
-    this.fill(fE, half + this.exitGap(), hubA, false, true);
+    this.fill(fE, half, hubA, false, true);
     const hub = this.addPlatform(fE, hubA, B + half, half, 'rect', 'hub');
     const cont = this.addExit(hub, B, back, false);
 
     // Side branch: across for B, dead-ends, jumps back to heading north, runs A into the hub.
     const sCornerA = B + half - endLen();
-    this.fill(sideE, half + this.exitGap(), sCornerA, false, true);
+    this.fill(sideE, half, sCornerA, false, true);
     const sCorner = this.addPlatform(sideE, sCornerA, B + half, half, 'rect', 'end');
     const sN = this.addExit(sCorner, B, back, false);
-    this.fill(sN, half + this.exitGap(), A - half, true, true);
+    this.fill(sN, half, A - half, true, true);
 
     this.frontier = { run: cont, along: this.entry(cont) };
   }
@@ -957,4 +968,12 @@ export class World {
     if (entry) this.addPlatform(run, a, a + len, CONFIG.junctionHalfWidth, 'rect', 'entry');
     else this.platformAt(run, a, len, shapes);
   }
+}
+
+/** How far (m) an edge jump at top speed carries before landing `drop` metres lower. */
+function landingReach(drop: number): number {
+  const v = CONFIG.jumpVelocity;
+  const g = CONFIG.gravity;
+  const t = (v + Math.sqrt(v * v + 2 * g * drop)) / g;
+  return CONFIG.maxSpeed * t;
 }

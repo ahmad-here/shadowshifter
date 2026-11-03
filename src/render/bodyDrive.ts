@@ -62,7 +62,8 @@ export class BodyDrive {
     const bankTarget = Math.max(-MAX_BANK, Math.min(MAX_BANK, -rate * 0.09));
     this.bank = approach(this.bank, bankTarget, 10, dt);
     // Landing compression, settling back.
-    if (sim.landings > this.seenLandings) this.crouch = 1;
+    // Deeper crouch the harder the landing (a big drop absorbs through the legs and spine).
+    if (sim.landings > this.seenLandings) this.crouch = Math.min(2.2, sim.landingSpeed / 8);
     this.seenLandings = sim.landings;
     this.crouch = approach(this.crouch, 0, 7, dt);
 

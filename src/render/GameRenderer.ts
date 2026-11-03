@@ -7,6 +7,7 @@ import { CameraRig } from './CameraRig';
 import { EffectsView } from './EffectsView';
 import { WindView } from './WindView';
 import { DustView } from './DustView';
+import { BurnView } from './BurnView';
 import { loadCharacter } from './CharacterModel';
 import { loadFireGeometry, loadObstacleModels } from './props';
 import { CityDecor } from './CityDecor';
@@ -37,6 +38,7 @@ export class GameRenderer {
   private shards = new ShardView();
   private wind = new WindView();
   private dust = new DustView();
+  private burn = new BurnView();
   /** Reduced visual effects (setting / prefers-reduced-motion): no flicker or pulsing. */
   reducedEffects = false;
   private quality: QualityParams = QUALITY.medium;
@@ -72,6 +74,7 @@ export class GameRenderer {
       this.shards.mesh,
       this.wind.lines,
       this.dust.points,
+      this.burn.group,
       this.backdrop.group,
     );
     // The animated character loads once, in the background; the placeholder runs until then.
@@ -139,6 +142,7 @@ export class GameRenderer {
     this.city.update(sim.world, this.elapsed, rise);
     this.wind.update(sim, dt, this.reducedEffects);
     this.dust.update(sim, dt, this.reducedEffects);
+    this.burn.update(sim, dt, this.reducedEffects);
     this.rig.update(sim, dt, this.reducedEffects);
     this.backdrop.update(sim.x, sim.z);
     this.renderer.render(this.scene, this.rig.camera);

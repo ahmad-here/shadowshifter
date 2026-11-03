@@ -7,13 +7,101 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
     />
     <meta name="theme-color" content="#0a1830" />
-    <title>Shadow Shift</title>
+    <title>Shadow Shift: 3D Parkour Game Online, Free, No Download</title>
+    <meta
+      name="description"
+      content="Shadow Shift is a free 3D parkour game to play online in your browser. Free-run over rooftops, wall-run, climb, slide under pipes and dodge lasers. No download."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://shadowshifter.wasmer.app/" />
+
+    <!-- Social previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Shadow Shift" />
+    <meta property="og:url" content="https://shadowshifter.wasmer.app/" />
+    <meta property="og:title" content="Shadow Shift: 3D Parkour Game Online, Free, No Download" />
+    <meta
+      property="og:description"
+      content="Leap between floating towers, wall-run, dodge lasers and survive the darkness. Free, no download, plays on desktop and mobile."
+    />
+    <meta property="og:image" content="https://shadowshifter.wasmer.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Shadow Shift title over a neon rooftop runway at night" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Shadow Shift: 3D Parkour Game Online, Free, No Download" />
+    <meta
+      name="twitter:description"
+      content="Leap between floating towers, wall-run, dodge lasers and survive the darkness. Free in your browser."
+    />
+    <meta name="twitter:image" content="https://shadowshifter.wasmer.app/og-image.jpg" />
+
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
+
+    <!-- Structured data: a free single-player browser game -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "VideoGame",
+            "@id": "https://shadowshifter.wasmer.app/#game",
+            "name": "Shadow Shift",
+            "url": "https://shadowshifter.wasmer.app/",
+            "image": "https://shadowshifter.wasmer.app/og-image.jpg",
+            "description": "A free 3D parkour endless runner that plays in the browser: leap between floating towers, wall-run, climb, slide under pipes, dodge lasers and survive the darkness.",
+            "genre": ["Parkour", "Endless runner", "Action", "Platformer"],
+            "keywords": "parkour game, 3D parkour, rooftop parkour, free running game, endless runner, browser game, play online free",
+            "gamePlatform": ["Web browser", "Desktop", "Mobile"],
+            "applicationCategory": "Game",
+            "operatingSystem": "Any (modern web browser with WebGL2)",
+            "playMode": "SinglePlayer",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://shadowshifter.wasmer.app/#website",
+            "name": "Shadow Shift",
+            "url": "https://shadowshifter.wasmer.app/",
+            "inLanguage": "en"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown until the game loads (and to crawlers that do not run JavaScript). -->
+      <main class="boot">
+        <h1>Shadow Shift: 3D Parkour Game</h1>
+        <p>
+          Shadow Shift is a free 3D parkour game that you play online, right in your browser, on
+          desktop or mobile. There is nothing to download or install. Free-run across neon
+          rooftops, leap the gaps between towers, carve round corners at full speed, run along
+          walls, climb onto taller buildings and slide under pipes, all while dodging red lasers
+          that burn on contact.
+        </p>
+        <h2>Game features</h2>
+        <ul>
+          <li>Rooftop parkour and free running: wall-runs, climbs, vaults and slides</li>
+          <li>An endless runner that speeds up the further you get</li>
+          <li>Black portals that plunge the city into darkness, and mirror portals that reverse every control</li>
+          <li>Works offline once loaded, on any modern browser with WebGL2</li>
+        </ul>
+        <h2>How to play</h2>
+        <ul>
+          <li>Jump: arrow up, W, Space or swipe up</li>
+          <li>Slide: arrow down, S or swipe down</li>
+          <li>Turn corners, steer in the air and wall-run: arrow left or right, A or D, or swipe sideways</li>
+          <li>Pause: Esc or P</li>
+        </ul>
+        <noscript><p>Shadow Shift needs JavaScript and WebGL2 to play.</p></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

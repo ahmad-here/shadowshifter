@@ -10,6 +10,8 @@ export const RUNNER_URL = './models/runner.glb';
 const FADE = 0.12;
 const SHADOW_BODY = new THREE.Color(0x05080f);
 const SHADOW_EDGE = new THREE.Color(0x2a6cff);
+const CHAR = new THREE.Color(0x120806);
+const EMBER = new THREE.Color(0xff4a0a);
 
 /**
  * The animated runner from runner.glb: one skinned mesh and five in-place clips, scaled to the
@@ -75,6 +77,18 @@ export class CharacterModel {
     for (const m of this.materials) {
       m.color.setScalar(1).lerp(SHADOW_BODY, k);
       m.emissive.copy(SHADOW_EDGE).multiplyScalar(0);
+    }
+  }
+
+  /**
+   * Burning in a laser: `char` (0..1) blackens the suit, `glow` (0..1) shows hot orange embers
+   * through it. Both 0 = normal (call after setShadow, which it overrides while burning).
+   */
+  setBurn(char: number, glow: number): void {
+    if (char <= 0 && glow <= 0) return;
+    for (const m of this.materials) {
+      m.color.lerp(CHAR, char);
+      m.emissive.copy(EMBER).multiplyScalar(glow);
     }
   }
 

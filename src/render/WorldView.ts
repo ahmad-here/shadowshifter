@@ -4,6 +4,7 @@ import type { Assets } from './assets';
 import * as place from './entities';
 import type { PlatformVisual } from './entities';
 import { Layer } from './Layer';
+import { COLORS } from './palette';
 import { RISE_DEPTH, RISE_DISTANCE, RISE_SECONDS, SLIDE_SECONDS } from './palette';
 
 /** Group wrapper so platform visuals can live in a Layer like every other entity. */
@@ -62,6 +63,13 @@ export class WorldView {
   /** Per-frame animation of entities (pads, portals, pulsing arrows). */
   animate(elapsed: number, padSquash: number): void {
     for (const { obj } of this.pads.items.values()) obj.children[0]!.scale.y = 0.2 * padSquash;
+    // Lasers hum and flicker like unstable energy (core and halo).
+    const hum = 0.85 + 0.15 * Math.sin(elapsed * 31) + 0.12 * Math.sin(elapsed * 73 + 1.3);
+    this.assets.obstacleGlow
+      .get('low')!
+      .color.setHex(COLORS.magenta)
+      .multiplyScalar(1.1 * hum);
+    this.assets.laserHalo.opacity = 0.32 * hum;
     // A used black portal keeps its swirl but its core goes out.
     for (const { entity, obj } of this.spells.items.values())
       obj.children[1]!.visible = !entity.taken;

@@ -31,6 +31,7 @@ export class FeedbackView {
   private blocked: THREE.Mesh;
   private blockedMat: THREE.MeshBasicMaterial;
   private blockedT = 1;
+  private burnSeen = false;
   private seen = { jumps: 0, landings: 0, refused: 0, spells: 0, portals: 0, near: 0 };
 
   constructor() {
@@ -71,6 +72,10 @@ export class FeedbackView {
     if (sim.jumps > s.jumps) this.pulse(sim, 0, COLORS.cyan, 0.25, 0.8, 1.8, 0.45);
     if (sim.spellsTaken > s.spells) this.pulse(sim, 0.9, COLORS.magenta, 0.6, 1, 7, 0.9);
     if (sim.portalsTaken > s.portals) this.pulse(sim, 0.9, COLORS.mirror, 0.6, 1, 7, 0.9);
+    // Laser burn: a hot orange flash ring at the moment of contact.
+    const burning = sim.phase === 'dying' && sim.deathCause === 'burn';
+    if (burning && !this.burnSeen) this.pulse(sim, 0.9, COLORS.orange, 0.5, 1, 5, 1);
+    this.burnSeen = burning;
     // Near miss: a quick bright flash ring around the runner.
     if (sim.nearMisses > s.near) this.pulse(sim, 0.8, 0xffffff, 0.3, 0.6, 4, 0.95);
     if (sim.leapsRefused > s.refused && sim.lastRefused) this.flashBlocked(sim, sim.lastRefused);

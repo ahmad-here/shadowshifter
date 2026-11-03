@@ -1,6 +1,30 @@
 {
   "version": 1,
   "skills": {
+    "seo-page": {
+      "source": "AgricIDaniel/claude-seo",
+      "sourceType": "github",
+      "skillPath": "skills/seo-page/SKILL.md",
+      "computedHash": "45087654327cad7ee05a95e8d392ee915410500b7c2c40bffe06c0972c4f1758"
+    },
+    "seo-schema": {
+      "source": "AgricIDaniel/claude-seo",
+      "sourceType": "github",
+      "skillPath": "skills/seo-schema/SKILL.md",
+      "computedHash": "73e80636bf1acddd15f16dacbbdf000c150894ad0e323171306f9359efb379d6"
+    },
+    "seo-sitemap": {
+      "source": "AgricIDaniel/claude-seo",
+      "sourceType": "github",
+      "skillPath": "skills/seo-sitemap/SKILL.md",
+      "computedHash": "3aa575cf0b14e1f6df9614954ae225fec406d156eeb6cb31342fe73ef9fe3421"
+    },
+    "seo-technical": {
+      "source": "AgricIDaniel/claude-seo",
+      "sourceType": "github",
+      "skillPath": "skills/seo-technical/SKILL.md",
+      "computedHash": "475824303c22a8ad7008672db53fe40431a48984b61949f8994d3e6a985678a8"
+    },
     "three-best-practices": {
       "source": "emalorenzo/three-agent-skills",
       "sourceType": "github",

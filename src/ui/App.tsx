@@ -29,6 +29,7 @@ export function App() {
     if (DEBUG) {
       (window as unknown as { __shadowShift?: unknown }).__shadowShift = {
         state: () => controller.debugState?.(),
+        setAutopilot: (on: boolean) => controller.setAutopilot?.(on),
       };
     }
     return () => {

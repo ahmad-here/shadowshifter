@@ -23,6 +23,14 @@ export class Assets {
   /** Their shaded metal bodies, and each kind's glowing part in its action colour. */
   readonly obstacleBody = new THREE.MeshLambertMaterial({ vertexColors: true });
   readonly obstacleGlow = new Map<ObstacleKind, THREE.MeshBasicMaterial>();
+  /** Additive glow around laser beams (a second, fatter copy of the beams). */
+  readonly laserHalo = new THREE.MeshBasicMaterial({
+    color: COLORS.magenta,
+    transparent: true,
+    opacity: 0.32,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
 
   readonly padGeo = new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
   readonly pad = new THREE.MeshBasicMaterial({ color: COLORS.cyan });

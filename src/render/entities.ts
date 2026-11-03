@@ -95,6 +95,14 @@ export function placeObstacle(a: Assets, pooled: THREE.Mesh | undefined, o: Obst
   glow.geometry = model.glow;
   glow.material = a.obstacleGlow.get(o.kind)!;
   glow.visible = true;
+  // Lasers: a fatter additive copy of the beams as a glow halo.
+  let halo = m.children[1] as THREE.Mesh | undefined;
+  if (o.kind === 'low' && !halo) m.add((halo = new THREE.Mesh(model.glow, a.laserHalo)));
+  if (halo) {
+    halo.geometry = model.glow;
+    halo.scale.set(1, 3.2, 5);
+    halo.visible = o.kind === 'low';
+  }
   return m;
 }
 

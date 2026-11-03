@@ -345,7 +345,8 @@ describe('obstacles', () => {
         expect(sim.phase === 'playing', `${kind} ${move} v${speed} cause=${sim.deathCause}`).toBe(
           survives,
         );
-        if (!survives) expect(sim.deathCause).toBe('hit');
+        // Lasers (low) burn; pipes and walls are a crash.
+        if (!survives) expect(sim.deathCause).toBe(kind === 'low' ? 'burn' : 'hit');
       }
     });
   }
@@ -353,7 +354,7 @@ describe('obstacles', () => {
   it('a huge time step cannot tunnel through an obstacle', () => {
     const sim = straight(200, { kind: 'low', at: 3 });
     sim.step(0.5);
-    expect(sim.deathCause).toBe('hit');
+    expect(sim.deathCause).toBe('burn');
   });
 });
 
@@ -371,6 +372,42 @@ function junction(turn: 'left' | 'right', withEntry = true) {
   });
   return { sim, target: () => target };
 }
+
+describe('connected corners', () => {
+  /** A dead end whose turn leads onto a building flush against its side (as generated). */
+  function corner(turn: 'left' | 'right') {
+    let target!: Platform;
+    const sim = custom((w, run) => {
+      const half = CONFIG.junctionHalfWidth;
+      const end = w.addPlatform(run, -5, 18 + half, half, 'rect', 'end');
+      const next = w.addExit(end, 18, turn, false);
+      target = w.addPlatform(next, half, 60, half, 'rect', 'entry');
+    });
+    return { sim, target: () => target };
+  }
+
+  it('a turn at a connected corner is run round on the ground, never jumped', () => {
+    for (const turn of ['left', 'right'] as const) {
+      const { sim, target } = corner(turn);
+      stepUntil(sim, () => along(sim) >= 17);
+      sim.act(turn);
+      for (let i = 0; i < 120; i++) {
+        sim.step(DT);
+        expect(sim.grounded, `airborne at step ${i}`).toBe(true);
+      }
+      expect(sim.dir).toBe(turn === 'left' ? 3 : 1);
+      expect(sim.corners).toBe(1);
+      expect(sim.platform).toBe(target());
+      expect(sim.phase).toBe('playing');
+    }
+  });
+
+  it('missing the corner runs off the end', () => {
+    const { sim } = corner('right');
+    finish(sim);
+    expect(sim.deathCause).toBe('fell');
+  });
+});
 
 describe('side jumps', () => {
   it('a side jump inside the exit window lands on the side building and changes heading', () => {
@@ -504,7 +541,7 @@ describe('trampoline (bounce, then steer in mid-air)', () => {
     expect(sim.deathCause).toBe('fell');
   });
 
-  it('jumping over the pad falls, and steering only works after a bounce', () => {
+  it('jumping over the pad falls: only a bounce reaches the side building', () => {
     const sim = trampolineWorld();
     reachTrampoline(sim, CONFIG.startSpeed);
     const padStart = 12 + CONFIG.trampolineLength - CONFIG.padFromEnd;
@@ -512,10 +549,9 @@ describe('trampoline (bounce, then steer in mid-air)', () => {
     sim.act('jump');
     sim.step(DT);
     stepUntil(sim, () => along(sim) > 12 + CONFIG.trampolineLength + CONFIG.trampolineGap + 1, 3);
-    sim.act('right'); // in the window, but not bouncing
+    sim.act('right'); // steers mid-air, but a normal jump is too low to reach the side building
     finish(sim);
     expect(sim.bounces).toBe(0);
-    expect(sim.dir).toBe(0);
     expect(sim.deathCause).toBe('fell');
   });
 });
@@ -618,15 +654,27 @@ describe('black portal (darkness)', () => {
     expect(sim.phase).toBe('playing');
   });
 
-  it('after surviving it, black portals are harmless for the cooldown', () => {
+  it('after surviving it, no black portal appears for the cooldown, then they return', () => {
     const sim = gateWorld((w, p) => {
-      // A second portal reached during the cooldown, a third after it.
-      w.addSpell(p, 10 + 16 * 12);
+      w.addSpell(p, 10 + 16 * 12); // would be reached during the break
     });
     stepUntil(sim, () => sim.effect === 'auto', CONFIG.shadowSeconds + 3);
-    stepUntil(sim, () => sim.world.spells[1]!.taken, 30);
+    stepFor(sim, 0.1);
     expect(sim.darkCooldown).toBeGreaterThan(0);
-    expect(sim.effect).not.toBe('shadow');
+    // The portal ahead is gone, not just harmless.
+    expect(sim.world.spells.filter((sp) => !sp.taken)).toHaveLength(0);
+    // One generated during the break is cleared too.
+    const p = sim.platform!;
+    sim.world.addSpell(p, along(sim) + 30);
+    sim.step(DT);
+    expect(sim.world.spells.filter((sp) => !sp.taken)).toHaveLength(0);
+    // After the break, portals stay.
+    sim.darkCooldown = DT / 2; // skip to the end of the break
+    sim.step(DT);
+    expect(sim.darkCooldown).toBe(0);
+    sim.world.addSpell(sim.platform!, along(sim) + 30);
+    sim.step(DT);
+    expect(sim.world.spells.filter((sp) => !sp.taken)).toHaveLength(1);
     expect(sim.spellsTaken).toBe(1);
   });
 
@@ -643,7 +691,16 @@ describe('black portal (darkness)', () => {
     stepUntil(sim, () => sim.effect === 'shadow', 3);
     expect(sim.act('jump')).toBe(true);
     finish(sim);
-    expect(sim.deathCause).toBe('hit');
+    expect(sim.deathCause).toBe('burn');
+  });
+
+  it('a laser burns: the runner stops dead in the beam, no bounce back', () => {
+    const sim = straight(200, { kind: 'low', at: 12 });
+    stepUntil(sim, () => sim.phase === 'dying', 3);
+    expect(sim.deathCause).toBe('burn');
+    const at = along(sim);
+    stepFor(sim, 0.5);
+    expect(along(sim)).toBeCloseTo(at, 5);
   });
 
   it('dying clears the darkness', () => {
@@ -680,7 +737,7 @@ describe('autopilot proves generated worlds are survivable', () => {
     return { sim, forks, maxP };
   };
 
-  const totals = { bounces: 0, spells: 0, forks: 0, vaults: 0, wallRuns: 0, climbs: 0 };
+  const totals = { bounces: 0, spells: 0, forks: 0, vaults: 0, wallRuns: 0, climbs: 0, corners: 0 };
   for (const seed of [1, 2, 3, 4, 5, 77, 2024, 31337, 8675309, 123456, 999, 4242]) {
     for (const takeForks of [false, true]) {
       it(`survives 3 minutes (seed ${seed}, ${takeForks ? 'side branches' : 'main route'})`, () => {
@@ -701,6 +758,7 @@ describe('autopilot proves generated worlds are survivable', () => {
         totals.vaults += sim.vaults;
         totals.wallRuns += sim.wallRuns;
         totals.climbs += sim.climbs;
+        totals.corners += sim.corners;
       });
     }
   }
@@ -712,6 +770,7 @@ describe('autopilot proves generated worlds are survivable', () => {
     expect(totals.vaults).toBeGreaterThan(10);
     expect(totals.wallRuns).toBeGreaterThan(10);
     expect(totals.climbs).toBeGreaterThan(10);
+    expect(totals.corners).toBeGreaterThan(100); // turns are run round on the ground
   });
 });
 
@@ -814,6 +873,21 @@ describe('parkour moves', () => {
 });
 
 describe('side-leap safety', () => {
+  it('in mid-air, ←/→ turns at once (carving), it does not wait for the landing', () => {
+    const sim = straight();
+    stepFor(sim, 0.5);
+    sim.act('jump');
+    stepFor(sim, 0.15);
+    expect(sim.grounded).toBe(false);
+    sim.act('right');
+    sim.step(DT);
+    expect(sim.grounded).toBe(false); // still in the air...
+    expect(sim.dir).toBe(1); // ...and already heading east
+    const x0 = sim.x;
+    stepFor(sim, 0.2);
+    expect(sim.x).toBeGreaterThan(x0 + 1); // moving east before touching down
+  });
+
   it('a side leap carves a quarter circle into the new heading, never a 90 degree snap', () => {
     const sim = custom((w, run) => {
       w.addPlatform(run, -5, 30, 3, 'rect', 'end');

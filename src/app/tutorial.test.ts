@@ -64,7 +64,7 @@ describe('Tutorial', () => {
       sim.step(DT);
       t.update(sim);
     }
-    expect(sim.deathCause).toBe('hit');
+    expect(sim.deathCause).toBe('burn'); // the barrier is a laser
     const sim2 = barrierSim();
     for (let i = 0; i < 300 && -sim2.z < 8; i++) sim2.step(DT);
     expect(new Tutorial(storage).update(sim2)).toBe('barrier');

@@ -1,7 +1,8 @@
 {
   "name": "Shadow Shift",
   "short_name": "Shadow Shift",
-  "description": "Endless neon runner: leap between floating towers and outrun the shadow.",
+  "description": "Free 3D parkour runner: leap between floating towers, wall-run, dodge lasers and survive the darkness.",
+  "categories": ["games", "entertainment"],
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",

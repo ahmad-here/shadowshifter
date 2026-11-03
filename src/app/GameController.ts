@@ -98,6 +98,13 @@ export class GameController {
    * Snapshot for e2e tests. The whole body is compiled out of production builds (DEBUG is a
    * build-time constant), which `npm run check:prod` verifies.
    */
+  /** Debug only: switch the autopilot on or off mid-run (e.g. to film a crash). */
+  readonly setAutopilot = DEBUG
+    ? (on: boolean) => {
+        this.opts.autopilot = on;
+      }
+    : undefined;
+
   readonly debugState = DEBUG
     ? () => {
         const sim = this.sim;
@@ -156,7 +163,7 @@ export class GameController {
       for (const i of this.input.drain()) this.intent(i);
       const sim = this.sim;
       // Hit-stop: hold the world for a beat at the moment of a crash, so impacts land with weight.
-      const crashed = sim.phase === 'dying' && sim.deathCause === 'hit';
+      const crashed = sim.phase === 'dying' && sim.deathCause !== 'fell';
       if (crashed && !this.crashSeen) this.hitStop = HIT_STOP_SECONDS;
       this.crashSeen = crashed;
       this.hitStop = Math.max(0, this.hitStop - dt);

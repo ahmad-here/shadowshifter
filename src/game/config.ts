@@ -44,13 +44,13 @@ export const CONFIG = Object.freeze({
   maxGap: 4.6,
   plainMinLength: 13,
   plainMaxLength: 20,
-  obstacleMinLength: 34,
+  obstacleMinLength: 37,
   obstacleMaxLength: 48,
   /**
    * Obstacles are this far from a platform's start: beyond the farthest landing point at top
    * speed plus time to react (otherwise a slide beam can arrive while still in the air)...
    */
-  obstacleStartMargin: 22,
+  obstacleStartMargin: 25,
   /** Minimum time between landing and reaching an obstacle, at any speed. */
   obstacleReactionSeconds: 0.45,
   /** ...and this far from its end (room to land after clearing it before the edge). */
@@ -91,7 +91,7 @@ export const CONFIG = Object.freeze({
   wallRunMinGap: 15,
   wallRunMaxGap: 17,
   /** Chance that a gap inside a stretch is a wall-run (once unlocked). */
-  wallRunChance: 0.35,
+  wallRunChance: 0.3,
   /** The wall stands this far outside the lane edge and rises this high above the deck. */
   wallOffset: 0.6,
   wallHeight: 5,
@@ -115,8 +115,8 @@ export const CONFIG = Object.freeze({
   minRise: 0.4,
   maxRise: 0.8,
   minDrop: 0.5,
-  maxDrop: 1.0,
-  maxLevel: 3,
+  maxDrop: 3.0,
+  maxLevel: 6,
   /** Obstacle-free platforms after a trampoline or fork, to recover before the next challenge. */
   calmPlatforms: 2,
 

@@ -49,7 +49,13 @@ export function GameOverPanel({ ui, onAgain, onMenu }: OverProps) {
   return (
     <div className="modal" data-testid="gameover">
       <div className="panel" role="dialog" aria-modal="true" aria-labelledby="over-title">
-        <h2 id="over-title">{ui.cause === 'fell' ? 'You fell' : 'You crashed'}</h2>
+        <h2 id="over-title">
+          {ui.cause === 'fell'
+            ? 'You fell'
+            : ui.cause === 'burn'
+              ? 'Burned by a laser'
+              : 'You crashed'}
+        </h2>
         {ui.newBest && (
           <p className="badge" data-testid="new-best">
             New best!

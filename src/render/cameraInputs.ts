@@ -9,7 +9,7 @@ export function seen(sim?: GameSim) {
     landings: sim?.landings ?? 0,
     jumps: sim?.jumps ?? 0,
     side: sim?.sideJumps ?? 0,
-    crash: sim?.phase === 'dying' && sim.deathCause === 'hit',
+    crash: sim?.phase === 'dying' && sim.deathCause !== 'fell',
     sliding: sim?.sliding ?? false,
     dir: sim?.dir ?? 0,
     moves: sim ? sim.vaults + sim.wallRuns + sim.climbs : 0,

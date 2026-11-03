@@ -36,11 +36,12 @@ export const OBSTACLE_COLORS: Record<ObstacleKind, number> = {
 };
 
 /**
- * Buildings appear this far ahead. Close enough that the route can't be memorised from far away,
- * far enough that a building is fully up ~36 m out (2 s of warning at top speed).
+ * Buildings (with everything on them) rise into place when their centre is this far ahead, quickly,
+ * so the route and its obstacles are solidly there well over 100 m out (6+ s at top speed): you
+ * read what is coming instead of having it pop up in front of you.
  */
-export const RISE_DISTANCE = 50;
-export const RISE_SECONDS = 0.8;
+export const RISE_DISTANCE = 140;
+export const RISE_SECONDS = 0.5;
 export const RISE_DEPTH = 45;
 /** After rising, a building slides from the previous deck's height to its own over this long. */
-export const SLIDE_SECONDS = 0.5;
+export const SLIDE_SECONDS = 0.35;

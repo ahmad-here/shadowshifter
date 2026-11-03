@@ -10,6 +10,7 @@ import {
   World,
   type Dir,
   type Exit,
+  type Obstacle,
   type Platform,
   type Spell,
   type Turn,
@@ -17,7 +18,8 @@ import {
 } from './world';
 
 export type Phase = 'ready' | 'playing' | 'paused' | 'dying' | 'gameover';
-export type DeathCause = 'fell' | 'hit';
+/** 'burn': touched a laser gate (the runner stops dead in the beam and burns). */
+export type DeathCause = 'fell' | 'hit' | 'burn';
 /** 'shadow': darkness after a black portal; 'auto': the reward for surviving it (pilot plays). */
 export type Effect = 'none' | 'shadow' | 'auto';
 /** Parkour move in progress (presentation reads it to pick poses). */
@@ -78,10 +80,14 @@ export class GameSim {
   /** Obstacles cleared by a hair (over a barrier or under a beam): rewarded with feedback. */
   nearMisses = 0;
   private lastNear = -1;
+  /** Corners run round on the ground (connected turns). */
+  corners = 0;
   /** Parkour moves started: vaults, wall-runs and climbs. */
   vaults = 0;
   wallRuns = 0;
   climbs = 0;
+  /** Downward speed (m/s) at the last touchdown: how hard it was (for landing feedback). */
+  landingSpeed = 0;
   /** Airborne-to-grounded transitions (for landing feedback). */
   landings = 0;
   /** Side leaps refused by `leapAllowed`, and which way the last one was. */
@@ -165,6 +171,7 @@ export class GameSim {
     this.shadowExits = 0;
     this.darkCooldown = 0;
     this.nearMisses = 0;
+    this.corners = 0;
     this.lastNear = -1;
     this.vaults = 0;
     this.wallRuns = 0;
@@ -287,8 +294,31 @@ export class GameSim {
       } else if (hold === 'go' && exit?.kind === 'hop' && canLeap) {
         this.hop(turn);
         this.sideBuffer = null;
+      } else if (!canLeap && hold === 'go' && !exit) {
+        // Mid-air: steer straight away (a carved turn in the air), unless it is a step toward a
+        // wall-run wall, which the wall catch takes. Heading south is refused as on the ground.
+        if (!this.wallOn(turn)) {
+          if (target === 2) {
+            this.leapsRefused += 1;
+            this.lastRefused = turn;
+          } else {
+            this.startArc(this.dir);
+            this.dir = target;
+            this.sideJumps += 1;
+          }
+          this.sideBuffer = null;
+        } else {
+          this.sideBufferTtl -= dt;
+          if (this.sideBufferTtl <= 0) this.sideBuffer = null;
+        }
       } else if (canLeap && hold === 'go') {
-        if (this.leapAllowed(target)) {
+        if (this.grounded && exit && this.cornerAhead(target)) {
+          // A connected corner: run round it on the ground (a carved turn, no jump).
+          this.sideJumps += 1;
+          this.corners += 1;
+          this.startArc(this.dir);
+          this.dir = target;
+        } else if (this.leapAllowed(target)) {
           this.sideJumps += 1;
           this.startArc(this.dir);
           this.leap(target, CONFIG.jumpVelocity);
@@ -303,7 +333,13 @@ export class GameSim {
       }
     }
     if (this.mirrorTime > 0) this.mirrorTime = Math.max(0, this.mirrorTime - dt);
-    if (this.darkCooldown > 0) this.darkCooldown = Math.max(0, this.darkCooldown - dt);
+    if (this.darkCooldown > 0) {
+      this.darkCooldown = Math.max(0, this.darkCooldown - dt);
+      // No black portals during the break after surviving the darkness: clear any already placed
+      // ahead and any generated meanwhile (the world removes them; their meshes go with them).
+      if (this.world.spells.some((sp) => !sp.taken))
+        this.world.spells = this.world.spells.filter((sp) => sp.taken);
+    }
 
     this.speed = Math.min(CONFIG.maxSpeed, this.speed + CONFIG.acceleration * dt);
     if (this.slideTime > 0) this.slideTime = Math.max(0, this.slideTime - dt);
@@ -378,7 +414,8 @@ export class GameSim {
         this.land(support);
       else return this.die('fell');
     }
-    if (this.y < ground + CONFIG.fallDeathY) return this.die('fell');
+    // Lost once below the deepest building a drop can reach (not mid-way down onto one).
+    if (this.y < ground - CONFIG.maxDrop + CONFIG.fallDeathY) return this.die('fell');
 
     const pad = w.padAt(this.x, this.z);
     if (pad && this.y <= pad.top + 0.05) {
@@ -392,7 +429,8 @@ export class GameSim {
       this.move = 'vault';
       this.vaults += 1;
     }
-    if (this.hitsObstacle()) return this.die('hit');
+    const struck = this.obstacleHit();
+    if (struck) return this.die(struck.kind === 'low' ? 'burn' : 'hit');
     const near = this.nearMiss();
     if (near !== null && near !== this.lastNear) {
       this.lastNear = near;
@@ -429,8 +467,6 @@ export class GameSim {
     for (const s of w.spells) {
       if (s.taken || !this.inGate(s)) continue;
       s.taken = true;
-      // Just survived one: portals in the cooldown are harmless (shown spent).
-      if (this.darkCooldown > 0) continue;
       this.spellsTaken += 1;
       this.effect = 'shadow';
       this.effectTime = CONFIG.shadowSeconds;
@@ -469,6 +505,29 @@ export class GameSim {
       if (ahead > -0.2 && ahead < CONFIG.vaultReach) return true;
     }
     return false;
+  }
+
+  /**
+   * The corner is connected: the building the turn leads onto joins the one underfoot, so the
+   * carve runs onto it on the ground (checked where the carve comes out, just past the side).
+   */
+  private cornerAhead(target: Dir): boolean {
+    const r = CONFIG.turnRadius;
+    const out = CONFIG.junctionHalfWidth + 0.6;
+    const x = this.x + DIR_X[this.dir]! * r + DIR_X[target]! * out;
+    const z = this.z + DIR_Z[this.dir]! * r + DIR_Z[target]! * out;
+    const s = this.world.supportAt(x, z);
+    return s !== null && s.run.dir === target && Math.abs(s.top - this.y) < 0.05;
+  }
+
+  /** A wall-run wall on that side of the run the runner is flying over. */
+  private wallOn(turn: Turn): boolean {
+    const side = turn === 'right' ? 1 : -1;
+    return this.world.walls.some((w) => {
+      if (w.side !== side || w.run.dir !== this.dir) return false;
+      const along = runAlong(w.run, this.x, this.z);
+      return along > w.a - 3 && along < w.b - CONFIG.wallKickLead;
+    });
   }
 
   /**
@@ -552,6 +611,7 @@ export class GameSim {
 
   private land(support: Platform | null): void {
     this.landings += 1;
+    this.landingSpeed = Math.max(0, -this.vy);
     this.move = 'none';
     this.wall = null;
     this.leapt = false;
@@ -730,6 +790,11 @@ export class GameSim {
   }
 
   hitsObstacle(): boolean {
+    return this.obstacleHit() !== null;
+  }
+
+  /** The obstacle the runner is touching, if any (vault ledges are cleared, never hit). */
+  private obstacleHit(): Obstacle | null {
     const r = CONFIG.runnerRadius;
     const top = this.y + this.height;
     for (const o of this.world.obstacles) {
@@ -742,10 +807,10 @@ export class GameSim {
         top > o.minY &&
         this.y < o.maxY
       ) {
-        return true;
+        return o;
       }
     }
-    return false;
+    return null;
   }
 
   /** Ease toward the centre line of the run underfoot so later narrow buildings line up. */
@@ -798,6 +863,10 @@ export class GameSim {
     if (cause === 'hit') {
       this.speed = 0;
       this.vy = Math.max(this.vy, 3);
+    } else if (cause === 'burn') {
+      // Caught in the beam: stopped dead, no bounce.
+      this.speed = 0;
+      this.vy = Math.min(this.vy, 0);
     }
     this.grounded = false;
   }
@@ -805,7 +874,7 @@ export class GameSim {
   private stepDying(dt: number): void {
     this.dyingTime += dt;
     // Falling runners keep their momentum; struck runners bounce back off what they hit.
-    const v = this.deathCause === 'fell' ? this.speed : -2;
+    const v = this.deathCause === 'fell' ? this.speed : this.deathCause === 'burn' ? 0 : -2;
     const nx = this.x + DIR_X[this.dir]! * v * dt;
     const nz = this.z + DIR_Z[this.dir]! * v * dt;
     // A runner dropping into a gap stops at the next building's face instead of passing through.
@@ -817,7 +886,7 @@ export class GameSim {
     this.vy -= CONFIG.gravity * dt;
     this.y += this.vy * dt;
     const under = this.world.supportAt(this.x, this.z);
-    if (this.deathCause === 'hit' && under && this.y < under.top && this.y > under.top - 0.5) {
+    if (this.deathCause !== 'fell' && under && this.y < under.top && this.y > under.top - 0.5) {
       this.y = under.top;
       this.vy = 0;
     }

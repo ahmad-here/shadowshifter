@@ -41,7 +41,11 @@ export class DustView {
   update(sim: GameSim, dt: number, reduced: boolean): void {
     this.points.visible = this.enabled && !reduced;
     if (!this.points.visible) return;
-    if (sim.landings > this.seen.landings && sim.grounded) this.burst(sim, 12, 2.2);
+    // Bigger burst the harder the landing.
+    if (sim.landings > this.seen.landings && sim.grounded) {
+      const k = Math.min(2, sim.landingSpeed / 9);
+      this.burst(sim, Math.round(10 * k + 4), 1.6 + 1.4 * k);
+    }
     if (sim.sliding && !this.seen.sliding) this.burst(sim, 10, 3);
     this.seen = { landings: sim.landings, sliding: sim.sliding };
 

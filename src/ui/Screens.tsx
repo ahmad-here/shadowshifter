@@ -28,6 +28,7 @@ export function Screens({ api }: { api: GameApi }) {
       {ui.phase === 'ready' && (
         <Landing
           best={ui.best}
+          totalShards={ui.totalShards}
           onPlay={() => api.intent('primary')}
           onHowTo={() => setHowTo(true)}
           onSettings={() => setSettings(true)}

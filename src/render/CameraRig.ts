@@ -136,9 +136,9 @@ export class CameraRig {
   /** Kick the operator's body for what just happened in the sim. */
   private react(sim: GameSim, live: boolean, reduced: boolean, pace: number): void {
     const s = this.seen;
-    const crashed = sim.phase === 'dying' && sim.deathCause === 'hit';
+    const crashed = sim.phase === 'dying' && sim.deathCause !== 'fell';
     if (sim.landings > s.landings && !reduced) {
-      this.dip = 0.25;
+      this.dip = Math.min(0.7, 0.25 * (sim.landingSpeed / 9) ** 2);
       if (live) this.body.kick(jitter(this.t * 3) * 0.6, -2.2, jitter(this.t * 5) * 0.08);
     }
     if (live || crashed) {

@@ -120,6 +120,12 @@ export class RunnerView {
     this.tilt.rotation.x += (-fall.pitch - this.tilt.rotation.x) * k;
     this.tilt.rotation.z += (-fall.roll * m - this.tilt.rotation.z) * k;
     this.model?.setShadow(fall.shadow);
+    if (sim.deathCause === 'burn' && sim.phase !== 'playing') {
+      // Charred within a third of a second; embers flicker hot, then die down.
+      const t = sim.dyingTime;
+      const flicker = 0.75 + 0.25 * Math.sin(t * 47) * Math.sin(t * 23);
+      this.model?.setBurn(Math.min(1, t / 0.3), Math.max(0, 1 - t / 1.1) * flicker);
+    }
     this.body.color.setHex(fall.shadow > 0.5 ? 0x020306 : COLORS.runner);
     // Face along the carved turn (sim.facing), so the body visibly arcs round corners.
     this.yaw = approachAngle(this.yaw, sim.facing, 18, dt);

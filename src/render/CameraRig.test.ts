@@ -26,6 +26,8 @@ describe('CameraRig', () => {
       sim.act('start');
       rig.reset(sim);
       let checked = 0;
+      let lastSide = 0;
+      let swingUntil = -1;
       for (let i = 0; i < 120 * 90 && sim.phase === 'playing'; i++) {
         const a = autopilot(sim);
         if (a) sim.control(a);
@@ -35,8 +37,13 @@ describe('CameraRig', () => {
         expect(onScreen(rig, sim.x, sim.y + 0.9, sim.z), `runner t=${i * DT}`).toBe(true);
         const ax = sim.x + DIR_X[sim.dir]! * 15;
         const az = sim.z + DIR_Z[sim.dir]! * 15;
-        // Allow the sweep right after a side leap to catch up.
-        if (sim.grounded) expect(onScreen(rig, ax, 0, az), `ahead t=${i * DT}`).toBe(true);
+        // Allow the deliberate swing round after a side leap (about a second) to catch up.
+        if (sim.sideJumps > lastSide) {
+          lastSide = sim.sideJumps;
+          swingUntil = i + 120;
+        }
+        if (sim.grounded && i > swingUntil)
+          expect(onScreen(rig, ax, sim.y, az), `ahead t=${i * DT}`).toBe(true);
         checked++;
       }
       expect(checked).toBeGreaterThan(200);
@@ -51,6 +58,7 @@ describe('CameraRig', () => {
     rig.update(sim, DT, false);
     const rest = rig.camera.position.y;
     sim.landings += 1; // simulate a touchdown event
+    sim.landingSpeed = 9; // as hard as a normal jump
     rig.update(sim, DT, false);
     expect(rig.camera.position.y).toBeLessThan(rest);
     for (let i = 0; i < 240; i++) rig.update(sim, DT, false);

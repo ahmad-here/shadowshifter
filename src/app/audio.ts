@@ -42,6 +42,13 @@ const SOUNDS: Record<SoundEvent, Voice[]> = {
     { type: 'triangle', from: 660, to: 330, dur: 0.3, gain: 0.06, delay: 0.1 },
   ],
   mirrorEnd: [{ type: 'triangle', from: 440, to: 880, dur: 0.25, gain: 0.07 }],
+  // Laser burn: a harsh electric zap, then a long crackling sizzle.
+  burn: [
+    { type: 'sawtooth', from: 1800, to: 120, dur: 0.35, gain: 0.16 },
+    { type: 'square', from: 60, to: 55, dur: 0.25, gain: 0.08 },
+    { noise: true, from: 5000, to: 2500, dur: 1.2, gain: 0.14, delay: 0.08 },
+    { noise: true, from: 900, to: 300, dur: 0.9, gain: 0.08, delay: 0.25 },
+  ],
   crash: [
     { noise: true, from: 900, to: 120, dur: 0.35, gain: 0.2 },
     { type: 'sine', from: 90, to: 40, dur: 0.3, gain: 0.16 },

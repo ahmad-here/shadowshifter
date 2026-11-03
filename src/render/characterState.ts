@@ -32,6 +32,8 @@ export function chooseClip(sim: GameSim): ClipChoice {
     return { clip: 'run', timeScale: 0, loop: true };
   }
   if (sim.phase === 'dying' || sim.phase === 'gameover') {
+    // Burned: the body seizes and slowly sags instead of tumbling.
+    if (sim.deathCause === 'burn') return { clip: 'jumpDown', timeScale: 0.25, loop: false };
     return { clip: 'jumpDown', timeScale: 1.2, loop: false };
   }
   // Parkour moves: the run cycle on the wall and (fast, scrambling) up a climb; a tuck for the
