@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a1830" />
+    <title>Understanding Parkour Movement in 3D Games</title>
+    <meta name="description" content="How 3D games turn parkour into play: jumps, slides, vaults, wall-runs and climbs, how momentum and animation sell them, and what makes movement feel fair." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://shadowshifter.wasmer.app/blog/parkour-movement-in-3d-games/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Shadow Shift" />
+    <meta property="og:url" content="https://shadowshifter.wasmer.app/blog/parkour-movement-in-3d-games/" />
+    <meta property="og:title" content="Understanding Parkour Movement in 3D Games" />
+    <meta property="og:description" content="How 3D games turn parkour into play: jumps, slides, vaults, wall-runs and climbs, how momentum and animation sell them, and what makes movement feel fair." />
+    <meta property="og:image" content="https://shadowshifter.wasmer.app/images/shadow-shift-wall-running.webp" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="576" />
+    <meta property="article:published_time" content="2026-11-16" />
+    <meta property="article:modified_time" content="2026-11-16" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Understanding Parkour Movement in 3D Games" />
+    <meta name="twitter:description" content="How 3D games turn parkour into play: jumps, slides, vaults, wall-runs and climbs, how momentum and animation sell them, and what makes movement feel fair." />
+    <meta name="twitter:image" content="https://shadowshifter.wasmer.app/images/shadow-shift-wall-running.webp" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/pages.css" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shadow Shift","item":"https://shadowshifter.wasmer.app/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://shadowshifter.wasmer.app/blog/"},{"@type":"ListItem","position":3,"name":"Understanding Parkour Movement in 3D Games","item":"https://shadowshifter.wasmer.app/blog/parkour-movement-in-3d-games/"}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Understanding Parkour Movement in 3D Games","description":"How 3D games turn parkour into play: jumps, slides, vaults, wall-runs and climbs, how momentum and animation sell them, and what makes movement feel fair.","image":"https://shadowshifter.wasmer.app/images/shadow-shift-wall-running.webp","datePublished":"2026-11-16","dateModified":"2026-11-16","mainEntityOfPage":"https://shadowshifter.wasmer.app/blog/parkour-movement-in-3d-games/","author":{"@type":"Organization","name":"Shadow Shift","url":"https://shadowshifter.wasmer.app/about/"},"publisher":{"@type":"Organization","name":"Shadow Shift","logo":{"@type":"ImageObject","url":"https://shadowshifter.wasmer.app/icon-512.png"}}}</script>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><span class="brand-tab"><img src="/icon.svg" alt="" width="26" height="26" /></span><span>Shadow Shift<small>Free 3D parkour game</small></span></a>
+      <nav aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/how-to-play/">How to Play</a>
+        <a href="/game-features/">Features</a>
+        <a href="/gameplay-tips/">Gameplay Tips</a>
+        <a href="/blog/">Blog</a>
+        <a href="/about/">About</a>
+      </nav>
+      <a class="play" href="/">Play now</a>
+    </header>
+    <header class="hero">
+      <img class="hero-bg" src="/images/shadow-shift-wall-running.webp" alt="A runner running along a tall wall over a long gap between buildings" width="1024" height="576" fetchpriority="high" />
+      <div class="hero-in">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Shadow Shift</a> / <a href="/blog/">Blog</a> / Understanding Parkour Movement in 3D Games</nav>
+        <p class="kicker">Blog · Guide</p>
+        <h1>Understanding Parkour Movement in 3D Games</h1>
+        <p class="lead">Real parkour is about moving through a space efficiently, using whatever is in the way.
+Games borrow that idea and turn it into a small set of moves you can perform with a few buttons. Here
+is how that translation works, and what separates movement that feels great from movement that feels
+clumsy.</p>
+        <p class="meta"><time datetime="2026-11-16">Published 2026-11-16</time> · 7 min read</p>
+      </div>
+    </header>
+    <main>
+<div class="panels">
+<section class="panel">
+  <span class="num" aria-hidden="true">01</span>
+<h2>From real parkour to game moves</h2>
+<p>Traceurs (people who practise parkour) use dozens of techniques: precision jumps, vaults, wall-runs,
+climb-ups, rolls. A game cannot give each one its own button, so it groups them into a few actions and
+picks the right animation from context. Running into a waist-high object performs a vault; jumping
+toward a wall performs a wall-run; hitting a tall face performs a climb.</p>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">02</span>
+<h2>The standard move set</h2>
+<h3>Jumps</h3>
+<p>The foundation. In most games a jump has a fixed height and length, so players can learn exactly
+what it clears.</p>
+<h3>Slides</h3>
+<p>A low move that takes you under obstacles while keeping your speed.</p>
+<h3>Vaults</h3>
+<p>Crossing a waist-high obstacle with your hands. Many games make vaults automatic so they never
+interrupt the flow. In <a href="/">Shadow Shift</a>, rooftop AC units are vaulted automatically.</p>
+<h3>Wall-runs</h3>
+<p>Running along a vertical wall for a short distance, usually to cross a gap too long to jump. In
+Shadow Shift you jump, then step toward the wall in mid-air; the runner holds their height along it and
+kicks off onto the next building.</p>
+<h3>Climbs</h3>
+<p>Pulling up onto something taller. Games often trigger a climb when you run into a face that is
+within reach, and treat taller faces as walls.</p>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">03</span>
+<h2>Momentum: why movement feels heavy or light</h2>
+<p>Good parkour movement respects momentum. Speed carries into jumps, landings absorb force, and
+turns curve rather than snap. Shadow Shift, for example, carves a short arc into a turn instead of
+rotating instantly, and the camera leans into it. Small details like this are what make movement feel
+physical.</p>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">04</span>
+<h2>Animation sells the move</h2>
+<p>The same jump feels completely different depending on its animation. Anticipation before a jump,
+a lean into speed and a compression on landing tell your eyes what the body is doing. Many games layer
+procedural animation (lean, bank, head stabilisation) on top of recorded clips so the runner reacts to
+every change in direction.</p>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">05</span>
+<h2>What makes movement fair</h2>
+<ul>
+  <li><strong>Consistency:</strong> the same input always gives the same result.</li>
+  <li><strong>Readability:</strong> you can tell what each obstacle asks for before you reach it.</li>
+  <li><strong>Generous edges:</strong> small helpers such as a ledge catch after a jump that only
+  just falls short.</li>
+  <li><strong>Guaranteed solutions:</strong> in a generated world, every gap must be possible. Shadow
+  Shift's route generator is tested so that a jump from any edge reaches the next building at every speed.</li>
+</ul>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">06</span>
+<h2>First-person versus third-person</h2>
+<p>First-person parkour games feel immersive but make it hard to judge where your feet are.
+Third-person games, including most runners, show the whole body, which makes distances and timing much
+easier to read.</p>
+</section>
+<section class="panel">
+  <span class="num" aria-hidden="true">07</span>
+<h2>Next steps</h2>
+<p>See how these moves come together in <a href="/game-features/">Shadow Shift's features</a>, or
+<a href="/">play</a> and try a wall-run yourself.</p>
+</section>
+</div>
+<aside class="related" aria-label="Keep reading">
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/blog/beginners-guide-to-rooftop-parkour-games/"><strong>A Beginner's Guide to Rooftop Parkour Games</strong><span>how the genre works and where to start</span></a></li>
+    <li><a href="/blog/avoid-obstacles-in-running-games/"><strong>How to Avoid Obstacles in Running Games</strong><span>reading hazards at speed</span></a></li>
+    <li><a href="/game-features/"><strong>Shadow Shift features</strong><span>every move in the game</span></a></li>
+    <li><a href="/"><strong>Play Shadow Shift</strong><span>try it in your browser</span></a></li>
+  </ul>
+</aside>
+    </main>
+    <section class="cta-band" aria-label="Play">
+      <div>
+        <p class="kicker">Ready to run?</p>
+        <p class="cta-title">Free-run the neon rooftops</p>
+        <p>No download, no account. Plays in your browser on desktop and mobile.</p>
+      </div>
+      <a class="start" href="/">Start run</a>
+    </section>
+    <footer>
+      <div class="foot-brand">
+        <a class="brand" href="/"><img src="/icon.svg" alt="" width="24" height="24" />Shadow Shift</a>
+        <p>A free 3D parkour runner that plays in your browser.</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="/about/">About</a>
+        <a href="/how-to-play/">How to Play</a>
+        <a href="/game-features/">Features</a>
+        <a href="/gameplay-tips/">Gameplay Tips</a>
+        <a href="/blog/">Blog</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy-policy/">Privacy Policy</a>
+        <a href="/terms/">Terms</a>
+      </nav>
+    </footer>
+  </body>
+</html>

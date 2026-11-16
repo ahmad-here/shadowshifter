@@ -269,6 +269,7 @@ body,
 }
 
 .home-card {
+  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -293,12 +294,6 @@ body,
   transform: translateX(14px);
   box-shadow: 0 10px 26px rgba(20, 24, 30, 0.2);
   outline: none;
-}
-
-.home-card.static {
-  cursor: default;
-  transform: none;
-  background: rgba(250, 251, 252, 0.55);
 }
 
 .home-card strong {
@@ -453,7 +448,22 @@ body,
   gap: 10px;
 }
 
+.home-skills a {
+  color: inherit;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.home-skills a:hover,
+.home-skills a:focus-visible {
+  outline: none;
+  background: linear-gradient(160deg, #1d6fff, #2fd8ff);
+}
+
 .home-skills li {
+  overflow: hidden;
   display: grid;
   place-items: center;
   width: 56px;
@@ -596,6 +606,62 @@ body,
   }
 }
 
+.home-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.home-about {
+  margin-top: auto;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.home-about p {
+  margin: 0 0 8px;
+}
+
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.home-links a {
+  color: var(--ink-dark);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.home-links a:hover,
+.home-links a:focus-visible {
+  border-color: var(--ink-dark);
+  outline: none;
+}
+
+@media (max-width: 760px) {
+  .home-sub {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+  .home-about {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+    font-size: 11px;
+  }
+  .home-about p:first-child {
+    display: none;
+  }
+}
+
 /* ---------------------------------------------------------------- HUD */
 
 .hud {
@@ -667,14 +733,20 @@ body,
   transition: opacity 0.8s ease-in;
 }
 
-/* Darkness: the screen closes in around the runner; only the route ahead stays readable. */
+/* Darkness: a radial black-out centred on the runner (lower middle of the chase view). Clear
+   around the character, then a gradual, eased fade to near-black at the screen edges. */
 .vignette.shadow {
   opacity: 1;
   background: radial-gradient(
-    ellipse at 50% 62%,
-    transparent 12%,
-    rgba(1, 4, 10, 0.75) 38%,
-    rgba(0, 2, 6, 0.98) 62%
+    ellipse 75% 70% at 50% 64%,
+    rgba(0, 2, 6, 0.16) 0%,
+    rgba(0, 2, 6, 0.22) 16%,
+    rgba(0, 2, 6, 0.32) 28%,
+    rgba(0, 2, 6, 0.46) 42%,
+    rgba(0, 2, 6, 0.62) 56%,
+    rgba(0, 2, 6, 0.78) 72%,
+    rgba(0, 2, 6, 0.9) 90%,
+    rgba(0, 1, 4, 0.96) 100%
   );
 }
 
@@ -898,6 +970,41 @@ body,
   background: linear-gradient(90deg, var(--laser) 33%, var(--cyan) 33% 66%, var(--amber) 66%);
 }
 
+/* Real in-game thumbnails: the border keeps the action colour (red jump, cyan slide, amber side). */
+.card-icon.photo {
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #0a1830;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4) inset,
+    0 6px 16px -6px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.card-icon.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.card:hover .card-icon.photo img {
+  transform: scale(1.08);
+}
+
+.card-icon.mirror.photo {
+  border-radius: 12px;
+}
+
+@media (max-width: 560px) {
+  .card-icon.photo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
 .notice,
 .error {
   position: fixed;
@@ -1082,23 +1189,4 @@ body,
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-/* Pre-load intro in index.html (replaced when the game mounts). */
-.boot {
-  max-width: 640px;
-  margin: 12vh auto 0;
-  padding: 0 20px;
-  color: var(--muted);
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
-}
-.boot h1 {
-  color: #fff;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.boot h2 {
-  color: var(--cyan);
-  font-size: 1rem;
 }

@@ -19,11 +19,12 @@ export class EffectsView {
 
   update(sim: GameSim, dt: number): void {
     this.shadow = approach(this.shadow, sim.effect === 'shadow' ? 1 : 0, 3, dt);
-    SHADOW_WORLD.value = this.shadow;
-    // Only the last few metres are visible: everything further, neon edges included, is black.
-    this.fog.near = THREE.MathUtils.lerp(40, 4, this.shadow);
-    this.fog.far = THREE.MathUtils.lerp(130, 18, this.shadow);
-    this.sky.setHex(COLORS.sky).lerp(SHADOW_SKY, this.shadow);
+    // Dim, not blind: buildings darken part-way and the fog thins out from ~14 m to ~55 m, so the
+    // route and obstacles stay readable with time to react.
+    SHADOW_WORLD.value = this.shadow * 0.6;
+    this.fog.near = THREE.MathUtils.lerp(40, 14, this.shadow);
+    this.fog.far = THREE.MathUtils.lerp(130, 55, this.shadow);
+    this.sky.setHex(COLORS.sky).lerp(SHADOW_SKY, this.shadow * 0.8);
     this.fog.color.copy(this.sky);
   }
 

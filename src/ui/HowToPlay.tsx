@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 
 interface Card {
   icon: string;
+  /** Real in-game thumbnail (public/howto/<img>.webp, captured by tools/capture-howto.mjs). */
+  img?: string;
   title: string;
   text: string;
   keys?: string;
@@ -11,6 +13,7 @@ interface Card {
 const CARDS: Card[] = [
   {
     icon: 'jump',
+    img: 'jump',
     title: 'Jump the gaps',
     text: 'Buildings float apart. Jump just before the edge.',
     keys: '↑ W Space',
@@ -18,6 +21,7 @@ const CARDS: Card[] = [
   },
   {
     icon: 'slide',
+    img: 'slide',
     title: 'Slide under',
     text: 'Cyan beams are too high to jump. Slide under them.',
     keys: '↓ S',
@@ -25,6 +29,7 @@ const CARDS: Card[] = [
   },
   {
     icon: 'leap',
+    img: 'leap',
     title: 'Leap sideways',
     text: 'At a dead end, leap onto the building beside you. The arrow shows which way.',
     keys: '← → A D',
@@ -32,6 +37,7 @@ const CARDS: Card[] = [
   },
   {
     icon: 'leap',
+    img: 'wallrun',
     title: 'Wall-run',
     text: 'A gap too long to jump with a wall beside it: jump, then step toward the wall to run along it.',
     keys: 'Jump, then ← / →',
@@ -39,11 +45,13 @@ const CARDS: Card[] = [
   },
   {
     icon: 'colors',
+    img: 'colors',
     title: 'Read the colours',
     text: 'Red: jump. Cyan: slide. Amber: either works.',
   },
   {
     icon: 'hop',
+    img: 'hop',
     title: 'Hop lanes',
     text: 'When your lane ends beside a parallel one, hop across and keep running.',
     keys: '← → A D',
@@ -51,16 +59,19 @@ const CARDS: Card[] = [
   },
   {
     icon: 'pad',
+    img: 'pad',
     title: 'Trampolines',
     text: 'Nothing ahead? Bounce on the glowing pad, then steer left or right in mid-air onto the side building.',
   },
   {
     icon: 'shadow',
+    img: 'shadow',
     title: 'Black portal',
     text: 'Running through it brings 8 s of darkness. Follow the glowing edges of the route.',
   },
   {
     icon: 'mirror',
+    img: 'mirror',
     title: 'Mirror portal',
     text: 'For 10 s you run backwards and every control is reversed.',
   },
@@ -124,11 +135,15 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
         <ul className="cards">
           {CARDS.map((c) => (
             <li key={c.title} className="card">
-              <span className={`card-icon ${c.icon}`} aria-hidden="true">
-                {GLYPHS[c.icon] && (
-                  <svg viewBox="0 0 24 24">
-                    <path d={GLYPHS[c.icon]} />
-                  </svg>
+              <span className={`card-icon ${c.icon}${c.img ? ' photo' : ''}`} aria-hidden="true">
+                {c.img ? (
+                  <img src={`./howto/${c.img}.webp`} alt="" width="96" height="96" loading="lazy" />
+                ) : (
+                  GLYPHS[c.icon] && (
+                    <svg viewBox="0 0 24 24">
+                      <path d={GLYPHS[c.icon]} />
+                    </svg>
+                  )
                 )}
               </span>
               <div>

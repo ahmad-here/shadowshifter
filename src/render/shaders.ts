@@ -103,10 +103,14 @@ const sideFragment = /* glsl */ `
     vec2 cell = vec2(floor(along), floor(fl));
     vec2 f = vec2(fract(along), fract(fl));
     float win = step(0.18, f.x) * step(f.x, 0.82) * step(0.2, f.y) * step(f.y, 0.78) * step(2.6, d);
-    float lit = hash2(cell + floor(vTopY));
+    // Wrapped to small values first: far from the origin the sine hash loses precision and
+    // turns into per-pixel static.
+    float lit = hash2(mod(cell, 61.0) + mod(floor(vTopY), 17.0));
     vec3 glass = mix(navy * 0.55, steel * 0.5, f.y * 0.4);
     vec3 light = lit > 0.86 ? vec3(1.0, 0.78, 0.45) : lit > 0.74 ? glow * 0.8 : glass;
+    #ifndef NO_WINDOWS
     c = mix(c, light, win * (1.0 - smoothstep(18.0, 30.0, d)));
+    #endif
     // Darkness: walls fade to black (lit windows survive as faint points).
     c = mix(c, vec3(0.006, 0.008, 0.012) + light * win * 0.15, uShadow);
     // Neon edge right under the deck (kept in the darkness: it outlines the route).
@@ -169,6 +173,13 @@ function uniforms(look: BuildingLook) {
 /**
  * Building materials, indexed by geometry group: [0] powder-coated rooftop, [1] walls.
  */
+/** Wall-run walls: the route's wall look without windows (a smooth panelled face to run on). */
+export function makeWallMaterial(): THREE.ShaderMaterial {
+  const m = makeBuildingMaterials()[1]!;
+  m.defines = { NO_WINDOWS: 1 };
+  return m;
+}
+
 export function makeBuildingMaterials(look: BuildingLook = ROUTE_LOOK): THREE.ShaderMaterial[] {
   const make = (fragmentShader: string, side: THREE.Side) =>
     new THREE.ShaderMaterial({

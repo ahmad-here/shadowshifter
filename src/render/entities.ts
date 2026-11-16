@@ -126,7 +126,7 @@ export function placePad(a: Assets, pooled: THREE.Group | undefined, p: Pad): TH
 /** Wall-run wall: a tall slab beside the gap, from below the deck to well above head height. */
 export function placeWall(a: Assets, pooled: THREE.Mesh | undefined, w: Wall): THREE.Mesh {
   // Building wall shader: same facade as the route, and it darkens with the world.
-  const m = pooled ?? new THREE.Mesh(a.wallGeo, a.building[1]);
+  const m = pooled ?? new THREE.Mesh(a.wallGeo, a.runWall);
   const bottom = w.deck - 4;
   const mid = runPoint(
     w.run,

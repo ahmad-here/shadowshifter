@@ -17,9 +17,9 @@ from mathutils import Matrix, Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = os.path.join(ROOT, 'art', 'Running-athletic.fbx')
-HIP_ROLL = math.radians(55)
-SPINE_COUNTER = math.radians(-22)
-OUTER_ARM = math.radians(55)
+HIP_ROLL = math.radians(30)
+SPINE_COUNTER = math.radians(-10)
+OUTER_ARM = math.radians(40)
 NEAR_ARM = math.radians(-15)
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 RENDER = args[args.index('--render') + 1] if '--render' in args else None

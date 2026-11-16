@@ -17,7 +17,8 @@
     "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:prod",
     "check:prod": "node scripts/check-prod.mjs",
     "convert:runner": "node tools/convert-runner.mjs",
-    "convert:props": "node tools/convert-fire.mjs"
+    "convert:props": "node tools/convert-fire.mjs",
+    "build:pages": "node tools/build-pages.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

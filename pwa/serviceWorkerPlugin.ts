@@ -1,7 +1,15 @@
 import type { Plugin } from 'vite';
 
 /** Public files served as-is that the offline game needs. */
-const PUBLIC_FILES = ['manifest.webmanifest', 'icon.svg', 'models/runner.glb', 'models/fire.glb'];
+// How-to-play thumbnails are precached so the in-game guide also works offline.
+const HOWTO = ['jump', 'slide', 'leap', 'wallrun', 'colors', 'hop', 'pad', 'shadow', 'mirror'];
+const PUBLIC_FILES = [
+  'manifest.webmanifest',
+  'icon.svg',
+  'models/runner.glb',
+  'models/fire.glb',
+  ...HOWTO.map((n) => `howto/${n}.webp`),
+];
 
 /**
  * Emits `sw.js` with the exact file list of this build. The cache name includes a hash of that
@@ -53,15 +61,21 @@ self.addEventListener('fetch', (event) => {
   // Only same-origin GETs; never cache third-party content.
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
   if (req.mode === 'navigate') {
-    // The page: network first so updates arrive, cached copy when offline.
+    // Network first so updates arrive. Only the game page itself is stored as the offline game:
+    // the guide pages (how to play, features, ...) must never overwrite it.
+    const isGame = url.pathname === new URL('./', self.registration.scope).pathname;
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          if (res.ok) caches.open(CACHE).then((c) => c.put('./', copy));
+          if (res.ok && isGame) caches.open(CACHE).then((c) => c.put('./', copy));
           return res;
         })
-        .catch(() => caches.match('./', { ignoreVary: true })),
+        // Offline: only the game URL falls back to the stored game; guide pages fail normally
+        // instead of silently showing the home page.
+        .catch(() =>
+          isGame ? caches.match('./', { ignoreVary: true }) : Response.error(),
+        ),
     );
     return;
   }

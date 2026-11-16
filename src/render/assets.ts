@@ -4,7 +4,7 @@ import { arrowGeometry, outlineGeometry, prismGeometry, SHAPES } from './geometr
 import { COLORS, OBSTACLE_COLORS } from './palette';
 import type { ObstacleModel } from './props';
 import { makePortalMaterial } from './portalShader';
-import { DECOR_LOOK, makeBuildingMaterials } from './shaders';
+import { DECOR_LOOK, makeBuildingMaterials, makeWallMaterial } from './shaders';
 
 /** Every geometry and material shared between meshes. Created once, disposed once. */
 export class Assets {
@@ -16,6 +16,7 @@ export class Assets {
   readonly building = makeBuildingMaterials();
   /** Scenery towers: a distinct, non-neon look (see DECOR_LOOK). */
   readonly decorBuilding = makeBuildingMaterials(DECOR_LOOK);
+  readonly runWall = makeWallMaterial();
   readonly outline = new THREE.LineBasicMaterial({ color: COLORS.cyan });
   readonly obstacle = new Map<ObstacleKind, THREE.Material>();
   /** Real-world obstacle models (see props.ts), once loaded; plain boxes until then. */

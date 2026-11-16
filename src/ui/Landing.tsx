@@ -8,12 +8,20 @@ interface Props {
   onSettings: () => void;
 }
 
-/** Skills shown as tiles, with the same line glyphs as the how-to-play cards. */
-const SKILLS: { name: string; path: string }[] = [
-  { name: 'Jump', path: 'M4 19h5M15 19h5M12 15V5M8 9l4-4 4 4' },
-  { name: 'Slide', path: 'M4 6h16M12 10v9M8 15l4 4 4-4' },
-  { name: 'Wall-run', path: 'M5 3v18M9 18c3-2 5-6 6-12M15 6l-3 1M15 6l1 3' },
-  { name: 'Portals', path: 'M5 9a7 7 0 0 1 13-2M19 15a7 7 0 0 1-13 2M18 3v4h-4M6 21v-4h4' },
+/** Skill tiles: each links to the part of the how-to-play guide that explains it. */
+const SKILLS: { name: string; href: string; path: string }[] = [
+  { name: 'Jump', href: '/how-to-play/#jump', path: 'M4 19h5M15 19h5M12 15V5M8 9l4-4 4 4' },
+  { name: 'Slide', href: '/how-to-play/#obstacles', path: 'M4 6h16M12 10v9M8 15l4 4 4-4' },
+  {
+    name: 'Wall-run',
+    href: '/how-to-play/#moves',
+    path: 'M5 3v18M9 18c3-2 5-6 6-12M15 6l-3 1M15 6l1 3',
+  },
+  {
+    name: 'Portals',
+    href: '/how-to-play/#portals',
+    path: 'M5 9a7 7 0 0 1 13-2M19 15a7 7 0 0 1-13 2M18 3v4h-4M6 21v-4h4',
+  },
 ];
 
 /** Top speed (m/s) the runner reaches, for the stats panel. */
@@ -37,7 +45,6 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
     { label: 'Best run', value: `${best} m`, k: Math.min(1, best / 3000) },
     { label: 'Shards', value: String(totalShards), k: Math.min(1, totalShards / 500) },
     { label: 'Top speed', value: `${TOP_SPEED} m/s`, k: 1 },
-    { label: 'Moves', value: '8', k: 0.8 },
   ];
   return (
     <section className="home" data-testid="ready" aria-labelledby="title">
@@ -47,7 +54,7 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
             <span className="brand-mark" />
           </span>
           <h1 id="title" className="home-title">
-            Shadow Shift
+            Shadow Shift <span className="home-sub">Free 3D Parkour Game</span>
           </h1>
           <span className="home-actions">
             <span className="home-pill" title="Energy shards collected">
@@ -89,7 +96,7 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
               <small>Sound, quality, effects</small>
             </span>
           </button>
-          <div className="home-card static" aria-label="Controls">
+          <a className="home-card" href="/how-to-play/#controls">
             <span className="home-thumb" aria-hidden="true">
               <Glyph d="M3 8h18v10H3zM7 12h.01M11 12h.01M15 12h.01M8 15h8" />
             </span>
@@ -97,6 +104,20 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
               <strong>Controls</strong>
               <small>Arrows · WASD · Swipe</small>
             </span>
+          </a>
+          <div className="home-about">
+            <p>
+              Free-run across neon rooftops in your browser: jump the gaps, carve round corners,
+              wall-run, climb and dodge lasers. No download.
+            </p>
+            <p className="home-links">
+              <a href="/how-to-play/">How to play</a>
+              <a href="/game-features/">Features</a>
+              <a href="/gameplay-tips/">Tips</a>
+              <a href="/blog/">Blog</a>
+              <a href="/about/">About</a>
+              <a href="/privacy-policy/">Privacy</a>
+            </p>
           </div>
         </nav>
 
@@ -110,10 +131,7 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
             <span className="home-unit">Best · metres</span>
           </div>
           <div className="home-name">
-            <strong>Runner</strong>
-            <small>
-              Class <b>S</b>
-            </small>
+            <strong>Your record</strong>
           </div>
           <ul className="home-stats">
             {stats.map((s) => (
@@ -127,8 +145,14 @@ export function Landing({ best, totalShards, onPlay, onHowTo, onSettings }: Prop
           <p className="home-label">Skills</p>
           <ul className="home-skills">
             {SKILLS.map((s) => (
-              <li key={s.name} title={s.name}>
-                <Glyph d={s.path} />
+              <li key={s.name}>
+                <a
+                  href={s.href}
+                  title={`How to ${s.name.toLowerCase()}`}
+                  aria-label={`How to ${s.name.toLowerCase()}`}
+                >
+                  <Glyph d={s.path} />
+                </a>
               </li>
             ))}
           </ul>

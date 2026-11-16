@@ -64,7 +64,9 @@ export class CharacterModel {
       next.setLoop(choice.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
       next.clampWhenFinished = !choice.loop;
       next.play();
-      if (prev && prev !== next) prev.crossFadeTo(next, FADE, false);
+      // Onto and off a wall the body tips over: blend longer so it never snaps.
+      const wall = choice.clip.startsWith('wallRun') || this.current?.startsWith('wallRun');
+      if (prev && prev !== next) prev.crossFadeTo(next, wall ? 0.28 : FADE, false);
       this.current = choice.clip;
     }
     next.timeScale = choice.timeScale;
