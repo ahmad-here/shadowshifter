@@ -165,7 +165,9 @@ Debug: `?seed=N` fixes the track, `?autopilot` plays automatically.
 - No per-frame React state updates. HUD updates go through `UiStore`, throttled.
 - Gameplay logic must stay in `src/game/` and be unit-testable without a browser.
 - Gameplay must never depend on frame rate; always go through `FixedStepper`.
-- No new runtime dependencies without a clear need. No external asset URLs at runtime.
+- No new runtime dependencies without a clear need. No external asset URLs at runtime, except
+  the Google AdSense script (owner's request; in `index.html` and every generated page, with
+  `public/ads.txt`). The privacy policy discloses its cookies.
 
 ## Performance budgets and browsers
 

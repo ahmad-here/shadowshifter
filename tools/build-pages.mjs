@@ -120,7 +120,7 @@ Your best distance is saved in your browser.</p>
 
 <h2>FAQ</h2>
 <h3>Is Shadow Shift free?</h3>
-<p>Yes, completely free, with no ads or purchases.</p>
+<p>Yes, completely free, with no purchases. The site shows ads to support development.</p>
 <h3>Can I play on mobile?</h3>
 <p>Yes. Swipe up to jump, down to slide and sideways to turn.</p>
 <h3>Do I need to download anything?</h3>
@@ -312,14 +312,28 @@ you can.</p>`,
     slug: 'privacy-policy',
     title: 'Privacy Policy – Shadow Shift',
     description:
-      'How Shadow Shift handles data: no accounts, no analytics, no cookies. Scores and settings stay in your own browser.',
+      'How Shadow Shift handles data: no accounts or analytics; ads by Google AdSense use cookies. Game scores and settings stay in your browser.',
     h1: 'Privacy Policy',
     priority: '0.2',
     body: `
 <p>Last updated: ${UPDATED}</p>
 <h2>What we collect</h2>
-<p>Nothing. Shadow Shift has no accounts, no analytics, no advertising, no cookies and no third-party
-scripts, and sends no gameplay data to any server.</p>
+<p>Shadow Shift has no accounts and no analytics, and sends no gameplay data to any server. We do not
+collect personal information ourselves.</p>
+<h2>Advertising and cookies</h2>
+<p>This site shows ads served by Google AdSense. Google and its partners use cookies (and similar
+technologies) to serve ads, including ads based on your previous visits to this and other websites, and
+to measure them. Google's use of advertising cookies enables it and its partners to serve ads to you
+based on your visits to this site and/or other sites on the internet.</p>
+<ul>
+  <li>Learn how Google uses data from sites that use its services:
+  <a href="https://policies.google.com/technologies/partner-sites" rel="nofollow">policies.google.com/technologies/partner-sites</a>.</li>
+  <li>Opt out of personalised advertising in
+  <a href="https://adssettings.google.com/" rel="nofollow">Google Ads Settings</a>, or opt out of
+  third-party vendors' cookies at <a href="https://www.aboutads.info/" rel="nofollow">aboutads.info</a>.</li>
+  <li>Where the law requires it (for example in the EEA, UK and Switzerland), you are asked for consent
+  before personalised ads are shown.</li>
+</ul>
 <h2>What is stored on your device</h2>
 <p>The game stores your best distance, your total energy shards, your settings (sound, graphics
 quality, reduced effects) and which tips you have seen, in your browser's local storage. It also caches
@@ -329,10 +343,11 @@ any time by clearing this site's data in your browser.</p>
 <p>The site is hosted by Wasmer. Like any web host, it may keep standard server logs (such as IP
 addresses and requested pages) under its own policies.</p>
 <h2>Your rights</h2>
-<p>Because we hold no personal data about you, there is nothing to access, correct or delete on our
-side. Data on your own device is under your control as described above.</p>
+<p>We hold no personal data about you, so there is nothing to access, correct or delete on our side.
+Data on your own device is under your control as described above. Advertising data is handled by
+Google under its own privacy policy; use the links above to control it.</p>
 <h2>Changes</h2>
-<p>If the game ever adds analytics or other data collection, this page will be updated first.</p>
+<p>If the game adds analytics or other data collection, this page will be updated first.</p>
 <h2>Contact</h2>
 <p><a href="mailto:${CONTACT}">${CONTACT}</a></p>`,
   },
@@ -457,6 +472,7 @@ function layout({
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/pages.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3074049091158622" crossorigin="anonymous"></script>
 ${ld}
   </head>
   <body>

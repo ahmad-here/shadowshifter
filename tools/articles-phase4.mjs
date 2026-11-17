@@ -242,7 +242,7 @@ iOS. <a href="/">Shadow Shift</a> supports all four.</p>
 
 <h2>Is it safe?</h2>
 <p>Browser games run inside the browser's sandbox and cannot install anything on your device. Shadow
-Shift has no accounts, no ads and no analytics; scores and settings stay in your browser (see the
+Shift has no accounts and no analytics; scores and settings stay in your browser (see the
 <a href="/privacy-policy/">privacy policy</a>).</p>
 
 <h2>Offline play</h2>
